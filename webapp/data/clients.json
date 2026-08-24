@@ -1,0 +1,37 @@
+[
+  {
+    "id": "case-1",
+    "sector": "Corporate device fleet",
+    "title": "HP EliteBook fan fault (error 90B)",
+    "summary": "Diagnosed a fan error code on a corporate laptop, worked through both hardware and BIOS-level checks, and restored the device to normal operation.",
+    "service": "Hardware Repair & Diagnostics"
+  },
+  {
+    "id": "case-2",
+    "sector": "Personal / SME device",
+    "title": "Dell Latitude BSOD recovery",
+    "summary": "Resolved an INACCESSIBLE_BOOT_DEVICE failure via an EFI partition rebuild, getting a client back up and running without data loss.",
+    "service": "Hardware Repair & Diagnostics"
+  },
+  {
+    "id": "case-3",
+    "sector": "Retail / small business",
+    "title": "HP ProBook touchpad reliability fix",
+    "summary": "Traced an intermittent touchpad freezing issue to power management settings and drivers, resolving a recurring frustration for daily use.",
+    "service": "Hardware Repair & Diagnostics"
+  },
+  {
+    "id": "case-4",
+    "sector": "Mobile device support",
+    "title": "Samsung Galaxy S24 Ultra launcher fix",
+    "summary": "Resolved an app drawer and launcher issue that was disrupting daily phone use, restoring normal function without a factory reset.",
+    "service": "Software Installation & Licensing"
+  },
+  {
+    "id": "_note",
+    "sector": "Add your real clients here",
+    "title": "This file is easy to edit",
+    "summary": "Replace these anonymized case studies with named clients, logos, and testimonials once you have their permission to feature them — just edit data/clients.json.",
+    "service": "—"
+  }
+]
