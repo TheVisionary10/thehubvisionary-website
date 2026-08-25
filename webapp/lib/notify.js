@@ -80,6 +80,7 @@ function sendSMS(to, message) {
         let data = "";
         res.on("data", (c) => (data += c));
         res.on("end", () => {
+          console.log("Raw AT Server Payload:", data);
           if (res.statusCode >= 200 && res.statusCode < 300) {
             resolve({ ok: true });
           } else {
