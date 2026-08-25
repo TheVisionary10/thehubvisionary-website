@@ -241,6 +241,82 @@
 
   // ---------- shared fragments ----------
 
+  /**
+   * Small brand illustrations for non-home pages, built from the same
+   * navy/sky/amber palette and line-based "network" style already used in
+   * the hero's boot sequence and grid background — no stock photography,
+   * so nothing to license and everything matches automatically.
+   */
+  function illustrationHub() {
+    return `
+      <svg class="page-illustration" viewBox="0 0 520 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g opacity="0.5">
+          <line x1="260" y1="110" x2="90" y2="45" stroke="#38BDF8" stroke-width="1.5"/>
+          <line x1="260" y1="110" x2="90" y2="175" stroke="#38BDF8" stroke-width="1.5"/>
+          <line x1="260" y1="110" x2="260" y2="30" stroke="#38BDF8" stroke-width="1.5"/>
+          <line x1="260" y1="110" x2="430" y2="45" stroke="#38BDF8" stroke-width="1.5"/>
+          <line x1="260" y1="110" x2="430" y2="175" stroke="#38BDF8" stroke-width="1.5"/>
+          <line x1="260" y1="110" x2="260" y2="190" stroke="#38BDF8" stroke-width="1.5"/>
+        </g>
+        <circle cx="90" cy="45" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="90" cy="175" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="260" cy="30" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="430" cy="45" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="430" cy="175" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="260" cy="190" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="260" cy="110" r="30" fill="#FF7A33"/>
+        <circle cx="260" cy="110" r="30" fill="none" stroke="#0A1F3D" stroke-width="1" opacity="0.15"/>
+      </svg>
+    `;
+  }
+
+  function illustrationDiagnostic() {
+    const cells = [];
+    const cols = 10;
+    const rows = 3;
+    const gap = 10;
+    const size = 34;
+    const highlighted = new Set(["2-0", "5-1", "7-0", "1-2", "8-2", "4-1"]);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const key = `${c}-${r}`;
+        const isHi = highlighted.has(key);
+        const x = c * (size + gap);
+        const y = r * (size + gap);
+        cells.push(
+          `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="6" fill="${
+            isHi ? "#38BDF8" : "#0A1F3D"
+          }" opacity="${isHi ? "0.9" : "0.08"}"/>`
+        );
+      }
+    }
+    return `
+      <svg class="page-illustration" viewBox="0 0 476 132" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        ${cells.join("")}
+      </svg>
+    `;
+  }
+
+  function illustrationPartnership() {
+    return `
+      <svg class="page-illustration" viewBox="0 0 520 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="180" y1="100" x2="340" y2="100" stroke="#38BDF8" stroke-width="2.5" opacity="0.6"/>
+        <g opacity="0.45">
+          <line x1="180" y1="100" x2="80" y2="50" stroke="#38BDF8" stroke-width="1.5"/>
+          <line x1="180" y1="100" x2="80" y2="150" stroke="#38BDF8" stroke-width="1.5"/>
+          <line x1="340" y1="100" x2="440" y2="50" stroke="#38BDF8" stroke-width="1.5"/>
+          <line x1="340" y1="100" x2="440" y2="150" stroke="#38BDF8" stroke-width="1.5"/>
+        </g>
+        <circle cx="80" cy="50" r="9" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="80" cy="150" r="9" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="440" cy="50" r="9" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="440" cy="150" r="9" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="180" cy="100" r="26" fill="#FF7A33"/>
+        <circle cx="340" cy="100" r="26" fill="#38BDF8"/>
+      </svg>
+    `;
+  }
+
   function contactCard() {
     return `
       <div class="contact-card">
@@ -412,8 +488,11 @@
         </div>
       </header>
       <section class="section">
-        <div class="wrap" id="clients-grid">
-          <div class="loading-row">Loading…</div>
+        <div class="wrap">
+          <div class="illustration-wrap">${illustrationDiagnostic()}</div>
+          <div id="clients-grid">
+            <div class="loading-row">Loading…</div>
+          </div>
         </div>
       </section>
     `;
@@ -976,8 +1055,11 @@
         </div>
       </header>
       <section class="section">
-        <div class="wrap" id="partners-grid">
-          <div class="loading-row">Loading…</div>
+        <div class="wrap">
+          <div class="illustration-wrap">${illustrationPartnership()}</div>
+          <div id="partners-grid">
+            <div class="loading-row">Loading…</div>
+          </div>
         </div>
       </section>
     `;
@@ -1017,6 +1099,7 @@
       </header>
       <section class="section">
         <div class="wrap" style="max-width:760px;">
+          <div class="illustration-wrap">${illustrationHub()}</div>
           <p style="font-size:16px; color:var(--ink); line-height:1.75; margin-bottom:20px;">
             TheHubVisionary is a Nairobi-based IT services company covering everything from hands-on
             hardware repair to the systems that run a growing business — websites, web apps, POS and
@@ -1101,7 +1184,7 @@
           `
           ).join("")}
           <div style="margin-top:40px; text-align:center;">
-            <a href="#/contact" class="btn btn-ghost">Ask us directly &rarr;</a>
+            <a href="#/contact" class="btn btn-ghost-light">Ask us directly &rarr;</a>
           </div>
         </div>
       </section>
@@ -1184,7 +1267,7 @@
           <p class="intro" style="margin:0 auto 32px;">The link might be old, or the address was mistyped. Here's how to get back on track:</p>
           <div class="hero-ctas" style="justify-content:center;">
             <a href="#/" class="btn btn-primary">Go home &rarr;</a>
-            <a href="#/services" class="btn btn-ghost">See all services</a>
+            <a href="#/services" class="btn btn-ghost-light">See all services</a>
           </div>
         </div>
       </section>

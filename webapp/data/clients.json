@@ -28,6 +28,97 @@
     "service": "Software Installation & Licensing"
   },
   {
+    "id": "case-5",
+    "sector": "Small office, Nairobi",
+    "title": "Ongoing IT support retainer for a 12-seat office",
+    "summary": "Set up a monthly support plan covering remote monitoring, patching, and a same-day on-call slot, replacing an ad-hoc \"call when something breaks\" arrangement.",
+    "service": "Managed IT Support"
+  },
+  {
+    "id": "case-6",
+    "sector": "SME device",
+    "title": "Recovered business files after accidental drive formatting",
+    "summary": "Recovered several years of business documents from a drive that had been formatted by mistake, then set up automated backups so it couldn't happen again.",
+    "service": "Data Recovery & Backup"
+  },
+  {
+    "id": "case-7",
+    "sector": "Local service business",
+    "title": "Booking-enabled website for a service business",
+    "summary": "Built a mobile-friendly site with an online booking form and a WhatsApp contact button, replacing a Facebook page as the business's main online presence.",
+    "service": "Website Design & Development"
+  },
+  {
+    "id": "case-8",
+    "sector": "Multi-staff business",
+    "title": "Custom staff attendance tracker",
+    "summary": "Built a lightweight web app to replace a paper sign-in sheet, giving management a simple daily view of who was in and when.",
+    "service": "Web App Development"
+  },
+  {
+    "id": "case-9",
+    "sector": "Multi-branch retail",
+    "title": "CRM setup for tracking leads across branches",
+    "summary": "Set up a simple CRM so a multi-branch retailer could track customer leads and follow-ups in one place instead of scattered notebooks and phone contacts.",
+    "service": "CRM Systems"
+  },
+  {
+    "id": "case-10",
+    "sector": "Appointment-based business",
+    "title": "Automated appointment reminders via SMS",
+    "summary": "Set up a bulk SMS system sending automatic appointment reminders, cutting down on missed bookings for a small clinic.",
+    "service": "Bulk SMS Services"
+  },
+  {
+    "id": "case-11",
+    "sector": "Growing SME",
+    "title": "Migrated business email to Google Workspace",
+    "summary": "Migrated a business off a personal Gmail account onto a proper Google Workspace setup with company email addresses and shared drives.",
+    "service": "Cloud Services & Migration"
+  },
+  {
+    "id": "case-12",
+    "sector": "Client-facing web app",
+    "title": "Ongoing server monitoring and patching",
+    "summary": "Took over monitoring for a business's existing server, catching and resolving a memory issue before it caused downtime for their customers.",
+    "service": "Server Management & DevOps"
+  },
+  {
+    "id": "case-13",
+    "sector": "Two-floor office",
+    "title": "Structured Wi-Fi setup for a growing office",
+    "summary": "Replaced a single overloaded router with a proper multi-access-point setup and separated guest and staff networks across two floors.",
+    "service": "Network Setup & Security"
+  },
+  {
+    "id": "case-14",
+    "sector": "Established SME network",
+    "title": "Ongoing network monitoring for an existing setup",
+    "summary": "Took over management of a network that was already in place, catching a recurring connectivity drop that had been going unresolved for weeks.",
+    "service": "Network Management"
+  },
+  {
+    "id": "case-15",
+    "sector": "Retail shop",
+    "title": "4-camera CCTV install for a shop floor",
+    "summary": "Installed and configured a 4-camera CCTV system covering the shop floor and till area, with remote viewing set up on the owner's phone.",
+    "service": "CCTV & Security"
+  },
+  {
+    "id": "case-16",
+    "sector": "Multi-branch business",
+    "title": "Infrastructure planning for a multi-branch rollout",
+    "summary": "Assessed an existing single-branch system ahead of a 3-branch expansion and planned the infrastructure changes needed to scale it without downtime.",
+    "service": "Large-Scale & Enterprise Systems"
+  },
+  {
+    "id": "case-17",
+    "sector": "Retail shop",
+    "title": "Custom POS system for daily sales and inventory",
+    "summary": "Built a point-of-sale system tailored to a retail shop's own workflow, tracking daily sales, stock levels, and expenses in one place instead of separate notebooks.",
+    "service": "POS Systems"
+  },
+  {
     "id": "_note",
     "sector": "Add your real clients here",
     "title": "This file is easy to edit",
