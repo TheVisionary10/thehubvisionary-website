@@ -528,7 +528,7 @@
         <div class="wrap">
           <div class="section-tag">// Book a Callout or Get a Quote</div>
           <h1>Tell us what you need &mdash; we'll take it from there</h1>
-          <p>Book a callout to get on our schedule, or generate a PDF quote first if you just want an exact figure to review.</p>
+          <p>Book a callout to get on our schedule, or generate a PDF estimate first if you just want a real price range to review.</p>
         </div>
       </header>
       <section class="cta" style="padding-top:40px;">
@@ -874,7 +874,7 @@
               ? `KSh ${data.totalHigh.toLocaleString()}`
               : `KSh ${data.totalLow.toLocaleString()} – ${data.totalHigh.toLocaleString()} (estimate)`;
           msgBox.textContent = `✓ Quote ${data.number || ""} generated — ${totalStr}.`;
-          const expiryStr = new Date(data.expiresAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+          const expiryStr = new Date(data.expiresAt).toLocaleDateString("en-GB", { timeZone: "Africa/Nairobi", day: "2-digit", month: "short", year: "numeric" });
           resultBox.innerHTML = quoteResultPanel(data, expiryStr, payload);
           wireQuoteResultActions(resultBox, data, payload);
         }

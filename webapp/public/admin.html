@@ -33,6 +33,18 @@
   .empty{color:var(--slate); font-size:14px; padding:16px 0;}
   .stat-cards{display:grid; grid-template-columns:repeat(5, 1fr); gap:14px; margin-bottom:32px;}
   @media(max-width:800px){ .stat-cards{grid-template-columns:repeat(2, 1fr);} }
+  .stat-card.money .n{font-size:19px;}
+  .stat-card.money.warn .n{color:var(--amber);}
+  .admin-section-head{margin:8px 0 14px;}
+  .admin-section-head h2{font-family:var(--display); font-size:15px; color:var(--navy); text-transform:uppercase; letter-spacing:0.03em;}
+  .trend-chart{
+    display:flex; align-items:flex-end; gap:10px; height:150px; background:#fff; border:1px solid var(--line-light);
+    border-radius:10px; padding:16px 20px 12px; margin-bottom:32px;
+  }
+  .trend-bar-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+  .trend-bar{width:60%; min-height:4px; background:var(--sky); border-radius:4px 4px 0 0; transition:height 0.3s;}
+  .trend-count{font-family:var(--mono); font-size:11px; color:var(--navy); margin-top:6px; font-weight:600;}
+  .trend-label{font-size:10.5px; color:var(--slate); margin-top:2px;}
   .stat-card{background:#fff; border:1px solid var(--line-light); border-radius:10px; padding:16px 18px;}
   .stat-card .n{font-family:var(--display); font-size:24px; font-weight:700; color:var(--navy);}
   .stat-card .l{font-size:11.5px; color:var(--slate); text-transform:uppercase; letter-spacing:0.03em; font-family:var(--mono);}
@@ -114,6 +126,7 @@
       <button class="admin-tabbtn" data-page="invoices">Invoices</button>
       <button class="admin-tabbtn" data-page="services">Services</button>
       <button class="admin-tabbtn" data-page="ourwork">Our Work</button>
+      <button class="admin-tabbtn" data-page="faq">FAQ</button>
       <button class="admin-tabbtn" data-page="partners">Partners</button>
       <button class="admin-tabbtn" data-page="settings">Settings</button>
     </div>
@@ -123,6 +136,16 @@
   <div class="admin-page" id="page-overview">
     <div class="admin-wrap">
       <div class="stat-cards" id="stat-cards"><div class="empty">Loading…</div></div>
+
+      <div class="admin-section-head"><h2>Revenue</h2></div>
+      <div class="stat-cards" id="revenue-cards"></div>
+
+      <div class="admin-section-head"><h2>Bookings, last 6 months</h2></div>
+      <div class="trend-chart" id="trend-chart"></div>
+
+      <div class="admin-section-head"><h2>Email delivery</h2></div>
+      <div class="breakdown-card" id="email-stats" style="margin-bottom:32px;"></div>
+
       <div class="breakdown-grid" id="breakdown-grid"></div>
     </div>
   </div>
@@ -264,6 +287,30 @@
       <div class="admin-section">
         <div class="admin-section-head"><h2>All Case Studies</h2></div>
         <div class="svc-admin-list" id="clients-list"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FAQ ================= -->
+  <div class="admin-page" id="page-faq">
+    <div class="admin-wrap">
+      <div class="admin-section">
+        <div class="admin-form">
+          <h3 id="faq-form-title">Add a question</h3>
+          <form id="faq-form">
+            <input type="hidden" id="faq-editing-id" value="">
+            <div class="admin-field"><label>Question *</label><input type="text" id="faq-q" placeholder="e.g. Do you charge a diagnostic fee?" required></div>
+            <div class="admin-field"><label>Answer *</label><textarea id="faq-a" rows="3" placeholder="The answer shown under the question." required></textarea></div>
+            <button type="submit" class="admin-btn primary" id="faq-submit-btn">Add question</button>
+            <button type="button" class="admin-btn" id="faq-cancel-edit" style="display:none;">Cancel edit</button>
+            <div class="admin-form-msg" id="faq-form-msg"></div>
+          </form>
+        </div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-head"><h2>All Questions</h2></div>
+        <p style="font-size:12.5px; color:var(--slate); margin:-8px 0 16px;">Shown on the public FAQ page in this order, top to bottom.</p>
+        <div class="svc-admin-list" id="faq-list"><div class="empty">Loading…</div></div>
       </div>
     </div>
   </div>

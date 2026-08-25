@@ -31,6 +31,7 @@ const { calloutFeeForDistance, countiesWithFees } = require("./lib/fees");
 const { createDocument } = require("./lib/documents");
 const { saveUploadedImage, deleteUploadedImage } = require("./lib/upload");
 const { notifyWebhook } = require("./lib/webhook");
+const { notifyAdmin } = require("./lib/notify");
 const { sendEmail, isEmailConfigured } = require("./lib/email");
 
 const PORT = process.env.PORT || 3000;
@@ -144,6 +145,27 @@ const server = http.createServer(async (req, res) => {
         `📋 New callout booking: ${record.name} (${record.phone}) — ${record.service} in ${record.county}. Fee est: ${record.calloutFee || "n/a"}.`
       );
 
+      const bookingSettings = readJSON(FILES.settings, {});
+      notifyAdmin({
+        subject: `New callout booking — ${record.name}`,
+        emailHtml: `
+          <h2 style="font-family:sans-serif;">New callout booking</h2>
+          <table style="font-family:sans-serif; font-size:14px; border-collapse:collapse;">
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Name</td><td><b>${record.name}</b></td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Phone</td><td>${record.phone}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Service</td><td>${record.service}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">County</td><td>${record.county}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Address</td><td>${record.address || "—"}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Preferred date</td><td>${record.preferredDate || "—"}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Estimated callout fee</td><td>${record.calloutFee || "—"}${record.accommodationLikely ? " (accommodation may apply)" : ""}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666; vertical-align:top;">Message</td><td>${record.message || "—"}</td></tr>
+          </table>
+          <p style="font-family:sans-serif; font-size:13px; margin-top:16px;">Log into <a href="https://thehubvisionary.com/admin">the admin panel</a> for the full booking list and to update its status.</p>
+        `,
+        smsText: `New callout: ${record.name} (${record.phone}) - ${record.service} in ${record.county}. Fee est: ${record.calloutFee || "n/a"}. Check admin panel.`,
+        settings: bookingSettings,
+      });
+
       return sendJSON(res, 201, { ok: true, id: record.id, calloutFee: feeInfo.fee, accommodationLikely: feeInfo.accommodation });
     }
 
@@ -179,9 +201,9 @@ const server = http.createServer(async (req, res) => {
     }
 
     // =========================================================
-    // QUOTE GENERATION (public create — this is the "get an exact
-    // figure" flow: client picks services, gets a PDF with a real
-    // number and an expiry, no login needed)
+    // QUOTE GENERATION (public create — this is the "get an estimate"
+    // flow: client picks services, gets a PDF with a real price range
+    // and an expiry, no login needed)
     // =========================================================
     if (pathname === "/api/quote/generate" && req.method === "POST") {
       if (rateLimited(ip, "quote", 6, 10 * 60 * 1000)) {
@@ -239,6 +261,30 @@ const server = http.createServer(async (req, res) => {
         `📄 New quote generated: ${record.number} for ${client.name} (${client.phone}) — est. ${record.totalLow.toLocaleString()}–${record.totalHigh.toLocaleString()}.`
       );
 
+      const itemsListHtml = items.map((it) => `<li>${it.description}${it.detail ? " — " + it.detail : ""}</li>`).join("");
+      const quoteEstText =
+        record.totalLow === record.totalHigh
+          ? `KSh ${record.totalHigh.toLocaleString()}`
+          : `KSh ${record.totalLow.toLocaleString()}–${record.totalHigh.toLocaleString()}`;
+      notifyAdmin({
+        subject: `New quote requested — ${client.name} (${record.number})`,
+        emailHtml: `
+          <h2 style="font-family:sans-serif;">New quote requested</h2>
+          <table style="font-family:sans-serif; font-size:14px; border-collapse:collapse;">
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Quote number</td><td><b>${record.number}</b></td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Name</td><td>${client.name}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Phone</td><td>${client.phone}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Email</td><td>${client.email || "—"}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">County</td><td>${client.county || "—"}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666; vertical-align:top;">Services</td><td><ul style="margin:0; padding-left:16px;">${itemsListHtml}</ul></td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Estimated total</td><td><b>${quoteEstText}</b></td></tr>
+          </table>
+          <p style="font-family:sans-serif; font-size:13px; margin-top:16px;">Log into <a href="https://thehubvisionary.com/admin">the admin panel</a> → Quotes for the full details and PDF.</p>
+        `,
+        smsText: `New quote: ${client.name} (${client.phone}) - est. ${quoteEstText}. ${record.number}. Check admin panel.`,
+        settings,
+      });
+
       let emailResult = { ok: false, reason: "No email address provided." };
       if (client.email) {
         try {
@@ -248,13 +294,22 @@ const server = http.createServer(async (req, res) => {
             subject: `Your quote from TheHubVisionary — ${record.number}`,
             html: `<p>Hi ${client.name || "there"},</p><p>Attached is your quote <b>${record.number}</b>, valid until ${new Date(
               record.expiresOrDueAt
-            ).toLocaleDateString("en-GB")}.</p><p>Reply to this email or WhatsApp us on ${settings.phone1 || ""} with any questions.</p><p>— TheHubVisionary</p>`,
+            ).toLocaleDateString("en-GB", { timeZone: "Africa/Nairobi" })}.</p><p>Reply to this email or WhatsApp us on ${settings.phone1 || ""} with any questions.</p><p>— TheHubVisionary</p>`,
             attachmentBuffer,
             attachmentName: `${record.number}.pdf`,
           });
         } catch (e) {
           console.error("Could not read generated quote PDF for emailing:", e);
           emailResult = { ok: false, reason: "The PDF was generated but couldn't be attached to the email." };
+        }
+        // Persist the outcome onto the saved record so it shows up in
+        // admin analytics (was previously only returned once and lost).
+        const allQuotes = readJSON(FILES.quotes, []);
+        const qIdx = allQuotes.findIndex((q) => q.id === record.id);
+        if (qIdx !== -1) {
+          allQuotes[qIdx].emailSent = emailResult.ok;
+          allQuotes[qIdx].emailReason = emailResult.ok ? null : emailResult.reason;
+          writeJSON(FILES.quotes, allQuotes);
         }
       }
 
@@ -344,6 +399,39 @@ const server = http.createServer(async (req, res) => {
           .map(([name, count]) => ({ name, count }));
       };
 
+      const paidInvoices = invoices.filter((i) => i.status === "paid");
+      const unpaidInvoicesList = invoices.filter((i) => i.status === "unpaid");
+      const totalQuotedValue = quotes.reduce((sum, q) => sum + (q.totalHigh || q.total || 0), 0);
+
+      // Emails: only count records where an address was actually given
+      // (client.email set) — "no address provided" isn't a failure, it's
+      // just not applicable, so it's excluded from both counts below.
+      const emailAttempted = (arr) => arr.filter((r) => r.client && r.client.email);
+      const quotesEmailAttempted = emailAttempted(quotes);
+      const invoicesEmailAttempted = emailAttempted(invoices);
+
+      // Last 6 calendar months (oldest first) — Nairobi time, so the
+      // month boundary matches what's shown everywhere else on the site.
+      const monthKey = (iso) =>
+        new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi", year: "numeric", month: "2-digit" }).format(new Date(iso));
+      const monthLabel = (key) => {
+        const [y, m] = key.split("-");
+        return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
+      };
+      const now = new Date();
+      const last6Months = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        last6Months.push(key);
+      }
+      const bookingsByMonthCount = countBy(bookings, (b) => monthKey(b.createdAt));
+      const bookingsByMonthMap = new Map(bookingsByMonthCount.map((r) => [r.name, r.count]));
+      const monthlyBookingsTrend = last6Months.map((key) => ({
+        month: monthLabel(key),
+        count: bookingsByMonthMap.get(key) || 0,
+      }));
+
       return sendJSON(res, 200, {
         totalBookings: bookings.length,
         newBookings: bookings.filter((b) => b.status === "new").length,
@@ -351,12 +439,27 @@ const server = http.createServer(async (req, res) => {
         doneBookings: bookings.filter((b) => b.status === "done").length,
         totalMessages: messages.length,
         newMessages: messages.filter((m) => m.status === "new").length,
+        contactedMessages: messages.filter((m) => m.status === "contacted").length,
+        doneMessages: messages.filter((m) => m.status === "done").length,
         totalQuotes: quotes.length,
         totalInvoices: invoices.length,
-        unpaidInvoices: invoices.filter((i) => i.status === "unpaid").length,
-        unpaidTotal: invoices.filter((i) => i.status === "unpaid").reduce((sum, i) => sum + (i.total || 0), 0),
+        unpaidInvoices: unpaidInvoicesList.length,
+        unpaidTotal: unpaidInvoicesList.reduce((sum, i) => sum + (i.total || 0), 0),
+        paidInvoices: paidInvoices.length,
+        paidTotal: paidInvoices.reduce((sum, i) => sum + (i.total || 0), 0),
+        totalQuotedValue,
+        avgQuoteValue: quotes.length ? Math.round(totalQuotedValue / quotes.length) : 0,
+        quotesEmailSent: quotesEmailAttempted.filter((q) => q.emailSent === true).length,
+        quotesEmailFailed: quotesEmailAttempted.filter((q) => q.emailSent === false).length,
+        invoicesEmailSent: invoicesEmailAttempted.filter((i) => i.emailSent === true).length,
+        invoicesEmailFailed: invoicesEmailAttempted.filter((i) => i.emailSent === false).length,
         bookingsByService: countBy(bookings, (b) => b.service),
         bookingsByCounty: countBy(bookings, (b) => b.county),
+        quotesByService: countBy(
+          quotes.flatMap((q) => (q.items || []).map((it) => it.description)),
+          (d) => d
+        ),
+        monthlyBookingsTrend,
       });
     }
 
@@ -443,13 +546,20 @@ const server = http.createServer(async (req, res) => {
             subject: `Invoice from TheHubVisionary — ${record.number}`,
             html: `<p>Hi ${client.name || "there"},</p><p>Attached is invoice <b>${record.number}</b>, due ${new Date(
               record.expiresOrDueAt
-            ).toLocaleDateString("en-GB")}.</p><p>— TheHubVisionary</p>`,
+            ).toLocaleDateString("en-GB", { timeZone: "Africa/Nairobi" })}.</p><p>— TheHubVisionary</p>`,
             attachmentBuffer,
             attachmentName: `${record.number}.pdf`,
           });
         } catch (e) {
           console.error("Could not read generated invoice PDF for emailing:", e);
           emailResult = { ok: false, reason: "The PDF was generated but couldn't be attached to the email." };
+        }
+        const allInvoices = readJSON(FILES.invoices, []);
+        const iIdx = allInvoices.findIndex((i) => i.id === record.id);
+        if (iIdx !== -1) {
+          allInvoices[iIdx].emailSent = emailResult.ok;
+          allInvoices[iIdx].emailReason = emailResult.ok ? null : emailResult.reason;
+          writeJSON(FILES.invoices, allInvoices);
         }
       }
 
@@ -466,6 +576,68 @@ const server = http.createServer(async (req, res) => {
       const allowed = ["unpaid", "paid", "cancelled"];
       if (allowed.includes(body.status)) invoices[idx].status = body.status;
       writeJSON(FILES.invoices, invoices);
+      return sendJSON(res, 200, { ok: true });
+    }
+
+    // ---------- ADMIN: FAQ CMS ----------
+    if (pathname === "/api/admin/faq" && req.method === "POST") {
+      if (!requireAuth(req, res, ip)) return;
+      if (!requireCSRFHeader(req, res)) return;
+      const body = await readBody(req, 2e5);
+      if (!body.q || !body.a) return sendJSON(res, 400, { error: "Both a question and an answer are required." });
+
+      const faq = readJSON(FILES.faq, []);
+      const record = { id: genId(), q: cleanText(body.q, 300), a: cleanText(body.a, 2000) };
+      faq.push(record);
+      writeJSON(FILES.faq, faq);
+      return sendJSON(res, 201, { ok: true, faq: record });
+    }
+    // Reordering: replace the whole list in one call with the new order —
+    // simpler and less error-prone than a "move up/down" endpoint per item.
+    // Checked BEFORE the generic "/api/admin/faq/:id" PUT handler below,
+    // since "/api/admin/faq/reorder" also matches that handler's prefix
+    // check and would otherwise always be intercepted by it first (with
+    // "reorder" wrongly treated as an FAQ id).
+    if (pathname === "/api/admin/faq/reorder" && req.method === "PUT") {
+      if (!requireAuth(req, res, ip)) return;
+      if (!requireCSRFHeader(req, res)) return;
+      const body = await readBody(req, 2e5);
+      if (!Array.isArray(body.order)) return sendJSON(res, 400, { error: "Expected an 'order' array of FAQ ids." });
+      const faq = readJSON(FILES.faq, []);
+      const byId = new Map(faq.map((f) => [f.id, f]));
+      const reordered = body.order.map((id) => byId.get(id)).filter(Boolean);
+      // any entries not mentioned in the new order (shouldn't normally happen) stay at the end, nothing is silently dropped
+      faq.forEach((f) => {
+        if (!body.order.includes(f.id)) reordered.push(f);
+      });
+      writeJSON(FILES.faq, reordered);
+      return sendJSON(res, 200, { ok: true, faq: reordered });
+    }
+    if (pathname.startsWith("/api/admin/faq/") && req.method === "PUT") {
+      if (!requireAuth(req, res, ip)) return;
+      if (!requireCSRFHeader(req, res)) return;
+      const id = pathname.split("/").pop();
+      const body = await readBody(req, 2e5);
+      const faq = readJSON(FILES.faq, []);
+      const idx = faq.findIndex((f) => f.id === id);
+      if (idx === -1) return sendJSON(res, 404, { error: "FAQ entry not found" });
+
+      faq[idx] = {
+        ...faq[idx],
+        q: cleanText(body.q, 300) || faq[idx].q,
+        a: cleanText(body.a, 2000) || faq[idx].a,
+      };
+      writeJSON(FILES.faq, faq);
+      return sendJSON(res, 200, { ok: true, faq: faq[idx] });
+    }
+    if (pathname.startsWith("/api/admin/faq/") && req.method === "DELETE") {
+      if (!requireAuth(req, res, ip)) return;
+      if (!requireCSRFHeader(req, res)) return;
+      const id = pathname.split("/").pop();
+      const faq = readJSON(FILES.faq, []);
+      const next = faq.filter((f) => f.id !== id);
+      if (next.length === faq.length) return sendJSON(res, 404, { error: "FAQ entry not found" });
+      writeJSON(FILES.faq, next);
       return sendJSON(res, 200, { ok: true });
     }
 

@@ -1,7 +1,7 @@
 // ---------- shared helpers ----------
   function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':String(s); return d.innerHTML; }
-  function fmtDate(iso){ try { return new Date(iso).toLocaleString(); } catch(e){ return iso; } }
-  function fmtDateShort(iso){ try { return new Date(iso).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}); } catch(e){ return iso; } }
+  function fmtDate(iso){ try { return new Date(iso).toLocaleString('en-GB', {timeZone:'Africa/Nairobi'}); } catch(e){ return iso; } }
+  function fmtDateShort(iso){ try { return new Date(iso).toLocaleDateString('en-GB', {timeZone:'Africa/Nairobi', day:'2-digit', month:'short', year:'numeric'}); } catch(e){ return iso; } }
 
   async function adminFetch(url, options = {}) {
     const opts = { ...options, headers: { ...(options.headers || {}), 'X-Thv-Admin': '1' } };
@@ -31,6 +31,8 @@
   async function loadStats(){
     const { data: s } = await adminFetch('/api/admin/stats');
     if (!s) return;
+    const fmtKsh = (n) => 'KSh ' + Number(n||0).toLocaleString();
+
     document.getElementById('stat-cards').innerHTML = `
       <div class="stat-card"><div class="n">${s.totalBookings}</div><div class="l">Bookings</div></div>
       <div class="stat-card"><div class="n">${s.newBookings}</div><div class="l">New Bookings</div></div>
@@ -38,10 +40,42 @@
       <div class="stat-card"><div class="n">${s.totalQuotes}</div><div class="l">Quotes</div></div>
       <div class="stat-card"><div class="n">${s.unpaidInvoices}</div><div class="l">Unpaid Invoices</div></div>
     `;
+
+    document.getElementById('revenue-cards').innerHTML = `
+      <div class="stat-card money"><div class="n">${fmtKsh(s.paidTotal)}</div><div class="l">Collected (${s.paidInvoices} paid invoice${s.paidInvoices===1?'':'s'})</div></div>
+      <div class="stat-card money warn"><div class="n">${fmtKsh(s.unpaidTotal)}</div><div class="l">Outstanding (${s.unpaidInvoices} unpaid)</div></div>
+      <div class="stat-card money"><div class="n">${fmtKsh(s.totalQuotedValue)}</div><div class="l">Pipeline value (all quotes, upper estimate)</div></div>
+      <div class="stat-card money"><div class="n">${fmtKsh(s.avgQuoteValue)}</div><div class="l">Average quote value</div></div>
+    `;
+
+    const emailTotal = s.quotesEmailSent + s.quotesEmailFailed + s.invoicesEmailSent + s.invoicesEmailFailed;
+    document.getElementById('email-stats').innerHTML = emailTotal ? `
+      <div class="breakdown-row"><span>Quotes emailed successfully</span><b>${s.quotesEmailSent}</b></div>
+      <div class="breakdown-row"><span>Quote emails that failed</span><b>${s.quotesEmailFailed}</b></div>
+      <div class="breakdown-row"><span>Invoices emailed successfully</span><b>${s.invoicesEmailSent}</b></div>
+      <div class="breakdown-row"><span>Invoice emails that failed</span><b>${s.invoicesEmailFailed}</b></div>
+      ${(s.quotesEmailFailed + s.invoicesEmailFailed) > 0 ? '<div class="file-hint" style="margin-top:8px;">Failed emails still generate the PDF fine \u2014 check your SMTP_USER/SMTP_PASS settings on your host if this keeps happening.</div>' : ''}
+    ` : '<div class="empty">No emails attempted yet \u2014 this fills in once a client enters an email on a quote, or you email an invoice.</div>';
+
+    const maxMonth = Math.max(1, ...s.monthlyBookingsTrend.map(m => m.count));
+    document.getElementById('trend-chart').innerHTML = s.monthlyBookingsTrend.map(m => `
+      <div class="trend-bar-wrap">
+        <div class="trend-bar" style="height:${Math.max(4, (m.count / maxMonth) * 100)}%;" title="${m.count} booking${m.count===1?'':'s'}"></div>
+        <div class="trend-count">${m.count}</div>
+        <div class="trend-label">${esc(m.month)}</div>
+      </div>
+    `).join('');
+
     const topN = (arr) => arr.slice(0, 6);
     document.getElementById('breakdown-grid').innerHTML = `
       <div class="breakdown-card"><h3>Bookings by service</h3>${topN(s.bookingsByService).map(x => `<div class="breakdown-row"><span>${esc(x.name)}</span><b>${x.count}</b></div>`).join('') || '<div class="empty">No data yet.</div>'}</div>
       <div class="breakdown-card"><h3>Bookings by county</h3>${topN(s.bookingsByCounty).map(x => `<div class="breakdown-row"><span>${esc(x.name)}</span><b>${x.count}</b></div>`).join('') || '<div class="empty">No data yet.</div>'}</div>
+      <div class="breakdown-card"><h3>Quotes by service</h3>${topN(s.quotesByService).map(x => `<div class="breakdown-row"><span>${esc(x.name)}</span><b>${x.count}</b></div>`).join('') || '<div class="empty">No data yet.</div>'}</div>
+      <div class="breakdown-card"><h3>Message status</h3>
+        <div class="breakdown-row"><span>New</span><b>${s.newMessages}</b></div>
+        <div class="breakdown-row"><span>Contacted</span><b>${s.contactedMessages}</b></div>
+        <div class="breakdown-row"><span>Done</span><b>${s.doneMessages}</b></div>
+      </div>
     `;
   }
 
@@ -410,6 +444,107 @@
     loadClients();
   });
 
+  // ================= FAQ =================
+  let ALL_FAQ = [];
+
+  function resetFaqForm(){
+    document.getElementById('faq-form').reset();
+    document.getElementById('faq-editing-id').value = '';
+    document.getElementById('faq-form-title').textContent = 'Add a question';
+    document.getElementById('faq-submit-btn').textContent = 'Add question';
+    document.getElementById('faq-cancel-edit').style.display = 'none';
+  }
+  document.getElementById('faq-cancel-edit').addEventListener('click', resetFaqForm);
+
+  function renderFaqList(){
+    const el = document.getElementById('faq-list');
+    if(!ALL_FAQ.length){ el.innerHTML = '<div class="empty">No questions yet.</div>'; return; }
+    el.innerHTML = ALL_FAQ.map((f, i) => `
+      <div class="svc-admin-row">
+        <div>
+          <b>${esc(f.q)}</b>
+          <div class="meta">${esc(f.a.slice(0, 90))}${f.a.length > 90 ? '…' : ''}</div>
+        </div>
+        <div class="admin-toolbar">
+          <button class="admin-btn" data-move-faq-up="${esc(f.id)}" ${i===0?'disabled':''}>↑</button>
+          <button class="admin-btn" data-move-faq-down="${esc(f.id)}" ${i===ALL_FAQ.length-1?'disabled':''}>↓</button>
+          <button class="admin-btn" data-edit-faq="${esc(f.id)}">Edit</button>
+          <button class="admin-btn danger" data-delete-faq="${esc(f.id)}">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function loadFaq(){
+    const res = await fetch('/api/faq');
+    ALL_FAQ = await res.json();
+    renderFaqList();
+  }
+
+  async function saveFaqOrder(){
+    await adminFetch('/api/admin/faq/reorder', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ order: ALL_FAQ.map(f => f.id) }) });
+  }
+
+  document.getElementById('faq-list').addEventListener('click', async (e) => {
+    const editId = e.target.getAttribute('data-edit-faq');
+    const delId = e.target.getAttribute('data-delete-faq');
+    const upId = e.target.getAttribute('data-move-faq-up');
+    const downId = e.target.getAttribute('data-move-faq-down');
+
+    if (editId) {
+      const f = ALL_FAQ.find(x => x.id === editId);
+      if (!f) return;
+      document.getElementById('faq-editing-id').value = f.id;
+      document.getElementById('faq-q').value = f.q;
+      document.getElementById('faq-a').value = f.a;
+      document.getElementById('faq-form-title').textContent = 'Edit question';
+      document.getElementById('faq-submit-btn').textContent = 'Save changes';
+      document.getElementById('faq-cancel-edit').style.display = 'inline-block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (delId) {
+      const f = ALL_FAQ.find(x => x.id === delId);
+      if (!f) return;
+      if (!confirm(`Delete "${f.q}"?`)) return;
+      const { ok, data } = await adminFetch('/api/admin/faq/' + delId, { method: 'DELETE' });
+      if (!ok) { alert((data && data.error) || 'Could not delete.'); return; }
+      loadFaq();
+    }
+    if (upId) {
+      const idx = ALL_FAQ.findIndex(x => x.id === upId);
+      if (idx > 0) {
+        [ALL_FAQ[idx - 1], ALL_FAQ[idx]] = [ALL_FAQ[idx], ALL_FAQ[idx - 1]];
+        renderFaqList();
+        saveFaqOrder();
+      }
+    }
+    if (downId) {
+      const idx = ALL_FAQ.findIndex(x => x.id === downId);
+      if (idx < ALL_FAQ.length - 1) {
+        [ALL_FAQ[idx + 1], ALL_FAQ[idx]] = [ALL_FAQ[idx], ALL_FAQ[idx + 1]];
+        renderFaqList();
+        saveFaqOrder();
+      }
+    }
+  });
+
+  document.getElementById('faq-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msgEl = document.getElementById('faq-form-msg');
+    const editingId = document.getElementById('faq-editing-id').value;
+    const payload = {
+      q: document.getElementById('faq-q').value.trim(),
+      a: document.getElementById('faq-a').value.trim(),
+    };
+    const url = editingId ? '/api/admin/faq/' + editingId : '/api/admin/faq';
+    const method = editingId ? 'PUT' : 'POST';
+    const { ok, data } = await adminFetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    if (!ok) { showMsg(msgEl, false, (data && data.error) || 'Something went wrong.'); return; }
+    showMsg(msgEl, true, editingId ? '✓ Question updated.' : '✓ Question added.');
+    resetFaqForm();
+    loadFaq();
+  });
+
   // ================= PARTNERS =================
   let ALL_PARTNERS = [];
   let pendingLogoDataUri = '';
@@ -575,5 +710,6 @@
   loadInvoices();
   loadServices();
   loadClients();
+  loadFaq();
   loadPartners();
   loadSettings();

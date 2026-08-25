@@ -112,6 +112,11 @@ DNS changes can take a few hours to propagate.
 | `SMTP_FROM`       | Optional. Send *as* a different address than `SMTP_USER` (only works if your Workspace allows "send as" for that alias). | same as `SMTP_USER` |
 | `RESEND_API_KEY`  | Alternative to SMTP — enables emailing via [Resend](https://resend.com) instead. Only used if `SMTP_USER`/`SMTP_PASS` aren't set. | *(none)* |
 | `EMAIL_FROM`      | The "from" address used when `RESEND_API_KEY` is set. Must be on a domain verified in your Resend dashboard. | `TheHubVisionary <onboarding@resend.dev>` |
+| `AT_USERNAME`     | Optional. Your [Africa's Talking](https://africastalking.com) username — enables SMS notifications to you whenever a booking or quote comes in. | *(none)* |
+| `AT_API_KEY`      | Your Africa's Talking API key, from the same dashboard. | *(none)* |
+| `AT_SENDER_ID`    | Optional. An approved sender ID/shortcode, if you have one. Without it, Africa's Talking uses a shared shortcode. | *(none)* |
+| `ADMIN_NOTIFY_EMAIL` | Optional. Where booking/quote notification emails go. Defaults to the "email" address in your site Settings if unset. | *(uses site settings)* |
+| `ADMIN_NOTIFY_PHONE` | Optional. Where booking/quote notification SMS go. Defaults to your site's primary phone number if unset. | *(uses site settings)* |
 
 **Change `ADMIN_PASS` before going live** — the admin panel shows every
 customer's phone number, address, and message, and can edit your entire
@@ -147,6 +152,8 @@ Log into `/admin` — beyond viewing bookings and messages, you can now:
 - **Our Work** — add, edit, or delete the case studies shown on the
   public "Our Work" page. Keep entries anonymized ("Retail shop,
   Nairobi") unless you have a client's permission to name them.
+- **FAQ** — add, edit, delete, and reorder the questions shown on the
+  public FAQ page (move a question up/down with the arrows next to it).
 - **Partners** — add or remove partners, including uploading a logo
   (PNG/JPEG, validated and capped at 2MB).
 - **Settings** — phone numbers, email, social media links (hidden on the
@@ -159,10 +166,47 @@ Log into `/admin` — beyond viewing bookings and messages, you can now:
 - **Invoices** — create a new invoice (client details + line items),
   which generates a PDF immediately and lists it with a paid/unpaid/
   cancelled status toggle.
+- **Overview** — bookings/messages/quotes/invoices at a glance, revenue
+  collected vs outstanding, total quote pipeline value, a 6-month
+  booking trend, and email delivery stats for quotes/invoices sent.
 
 Everything above writes to the same JSON files described below — the
 admin UI is just a friendlier way to edit them than opening the files
 by hand, and it validates input the way the API does either way.
+
+---
+
+## 5b. Getting notified the moment a booking or quote comes in
+
+Beyond checking `/admin`, you can be notified immediately by email
+and/or SMS whenever someone books a callout or requests a quote — with
+the client's name, phone, service, and the key details right in the
+notification, so you often don't need to open the admin panel at all
+unless you want the full picture.
+
+**Email notifications** reuse whatever you've already set up for
+sending quotes/invoices (`SMTP_USER`/`SMTP_PASS`, or `RESEND_API_KEY`)
+— nothing extra to configure. They go to `ADMIN_NOTIFY_EMAIL` if you
+set it, otherwise to the "email" address in your site Settings.
+
+**SMS notifications** use [Africa's Talking](https://africastalking.com)
+— the standard SMS gateway for Kenyan businesses (the same kind of
+service your own "Bulk SMS Services" offering sets up for clients):
+
+1. Sign up at africastalking.com, and in the dashboard go to **Settings
+   → API Key** to generate one (this also shows your username, usually
+   `sandbox` until you go live).
+2. On your host, set `AT_USERNAME` and `AT_API_KEY` to those values.
+3. Optionally set `AT_SENDER_ID` if you've registered a custom sender
+   ID; otherwise messages come from a shared shortcode, which works
+   fine to start.
+4. SMS notifications go to `ADMIN_NOTIFY_PHONE` if set, otherwise your
+   site's primary phone number.
+
+Both channels are independent — set up just email, just SMS, or both.
+Neither is required for the site to work; if nothing is configured,
+notifications are simply skipped (you'd rely on `/admin` or the
+Slack/Discord webhook below instead).
 
 ---
 

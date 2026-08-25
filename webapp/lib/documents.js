@@ -13,10 +13,29 @@ function pad(n, len) {
   return String(n).padStart(len, "0");
 }
 
+/** Y/M/D as seen in Nairobi right now, regardless of what timezone the
+ * server process itself runs in (Render's servers run in UTC). Keeps the
+ * date embedded in a document number consistent with the "Generated:"
+ * timestamp shown on the PDF, which is also forced to Africa/Nairobi. */
+function nairobiDateParts(date) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Nairobi",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const get = (type) => parts.find((p) => p.type === type).value;
+  return { year: get("year"), month: get("month"), day: get("day") };
+}
+
 function nextNumber(existing, prefix) {
-  const today = new Date();
-  const datePart = `${today.getFullYear()}${pad(today.getMonth() + 1, 2)}${pad(today.getDate(), 2)}`;
-  const seq = existing.length + 1;
+  const { year, month, day } = nairobiDateParts(new Date());
+  const datePart = `${year}${month}${day}`;
+  // Count only documents already generated on today's (Nairobi) date —
+  // not the all-time total — so the sequence correctly restarts at 0001
+  // each day, matching what the date-prefixed number format implies.
+  const todaysCount = existing.filter((r) => typeof r.number === "string" && r.number.includes(`-${datePart}-`)).length;
+  const seq = todaysCount + 1;
   return `${prefix}-${datePart}-${pad(seq, 4)}`;
 }
 

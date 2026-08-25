@@ -2,41 +2,41 @@
   {
     "id": "mt6tmtzm-c0ed33",
     "q": "What areas do you cover?",
-    "a": "We're based in Nairobi and cover all 47 counties in Kenya. Jobs within Nairobi use the standard per-service callout fee; jobs outside Nairobi include a distance-based travel fee \u2014 pick your county on the Book a Callout page to see an estimate before you submit."
+    "a": "We're based in Nairobi and cover all 47 counties in Kenya. Jobs within Nairobi use the standard per-service callout fee; jobs outside Nairobi include a distance-based travel fee — pick your county on the Book a Callout page to see an estimate before you submit."
   },
   {
     "id": "mt6tmtzm-5d2a29",
     "q": "Do you charge a diagnostic fee?",
-    "a": "For hardware repairs, yes \u2014 a small diagnostic fee (see the Hardware Repair service for the current amount) that's waived if you go ahead with the repair."
+    "a": "For hardware repairs, yes — a small diagnostic fee (see the Hardware Repair service for the current amount) that's waived if you go ahead with the repair."
   },
   {
     "id": "mt6tmtzm-a2fa82",
     "q": "Are the prices on the site final?",
-    "a": "They're starting guides. Every job gets a clear, specific quote \u2014 confirmed before any work begins \u2014 based on the actual scope once we've heard the details. You can also generate an instant PDF estimate from the Get a Quote page, with a real price range for the services you pick; we confirm the final figure once we've discussed exactly what you need."
+    "a": "They're starting guides. Every job gets a clear, specific quote — confirmed before any work begins — based on the actual scope once we've heard the details. You can also generate an instant PDF estimate from the Get a Quote page, with a real price range for the services you pick; we confirm the final figure once we've discussed exactly what you need."
   },
   {
     "id": "mt6tmtzm-8f5df0",
     "q": "Do quoted prices include software licenses or hosting costs?",
-    "a": "Where a job involves paid third-party software, hosting, domains, or gateway fees (common for websites, POS/CRM systems, and cloud setups), those are billed at cost and confirmed upfront \u2014 never bundled invisibly into the quote."
+    "a": "Where a job involves paid third-party software, hosting, domains, or gateway fees (common for websites, POS/CRM systems, and cloud setups), those are billed at cost and confirmed upfront — never bundled invisibly into the quote."
   },
   {
     "id": "mt6tmtzm-3dee15",
     "q": "How is the callout fee for locations outside Nairobi calculated?",
-    "a": "It's based on actual distance from Nairobi \u2014 fuel, vehicle costs, and travel time \u2014 not a flat guess. Farther counties cost more, and very remote areas may need flights and accommodation, which we'll confirm with you directly."
+    "a": "It's based on actual distance from Nairobi — fuel, vehicle costs, and travel time — not a flat guess. Farther counties cost more, and very remote areas may need flights and accommodation, which we'll confirm with you directly."
   },
   {
     "id": "mt6tmtzm-fb2a28",
-    "q": "I need ongoing support, not just a one-time fix \u2014 what should I book?",
-    "a": "Take a look at Managed IT Support, Network Management, or Server Management & DevOps on the Services page \u2014 these are monthly retainer options rather than one-off callouts."
+    "q": "I need ongoing support, not just a one-time fix — what should I book?",
+    "a": "Take a look at Managed IT Support, Network Management, or Server Management & DevOps on the Services page — these are monthly retainer options rather than one-off callouts."
   },
   {
     "id": "mt6tmtzm-a93aaa",
     "q": "How do I book a callout?",
-    "a": "Use the Book a Callout page \u2014 fill in your details, service, and county, and it goes straight into our system. We confirm by phone or WhatsApp, usually the same day."
+    "a": "Use the Book a Callout page — fill in your details, service, and county, and it goes straight into our system. We confirm by phone or WhatsApp, usually the same day."
   },
   {
     "id": "mt6tmtzm-a49de1",
     "q": "Can I get pricing before you start, without committing to a booking?",
-    "a": "Yes \u2014 use the Get a Quote page to build a line-by-line PDF estimate for the services you need, valid for a set period, which you can download or send straight to WhatsApp. It's a real price range based on the scale of work you select, not a placeholder \u2014 the final confirmed figure comes once we've discussed your exact requirements."
+    "a": "Yes — use the Get a Quote page to build a line-by-line PDF estimate for the services you need, valid for a set period, which you can download or send straight to WhatsApp. It's a real price range based on the scale of work you select, not a placeholder — the final confirmed figure comes once we've discussed your exact requirements."
   }
 ]
