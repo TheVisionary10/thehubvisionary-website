@@ -85,7 +85,7 @@
   {
     "id": "software-install",
     "category": "Fix & Support",
-    "icon": "10",
+    "icon": "04",
     "previewStyle": "checklist",
     "name": "Software Installation & Licensing",
     "tagline": "OS setup, office suites, POS systems, licensing clean-up",
@@ -111,7 +111,7 @@
   {
     "id": "websites",
     "category": "Build & Grow",
-    "icon": "04",
+    "icon": "05",
     "previewStyle": "browser",
     "name": "Website Design & Development",
     "tagline": "Business sites and e-commerce, built to bring in customers",
@@ -137,7 +137,7 @@
   {
     "id": "web-apps",
     "category": "Build & Grow",
-    "icon": "05",
+    "icon": "06",
     "previewStyle": "app",
     "name": "Web App Development",
     "tagline": "Custom booking, inventory and invoicing tools",
@@ -158,7 +158,7 @@
   {
     "id": "pos-systems",
     "category": "Build & Grow",
-    "icon": "11",
+    "icon": "07",
     "previewStyle": "receipt",
     "name": "POS Systems",
     "tagline": "Custom point-of-sale software, built and deployed for your business",
@@ -184,7 +184,7 @@
   {
     "id": "crm-systems",
     "category": "Build & Grow",
-    "icon": "12",
+    "icon": "08",
     "previewStyle": "crm",
     "name": "CRM Systems",
     "tagline": "Track leads, clients, and follow-ups in one place",
@@ -210,7 +210,7 @@
   {
     "id": "bulk-sms",
     "category": "Build & Grow",
-    "icon": "06",
+    "icon": "09",
     "previewStyle": "chat",
     "name": "Bulk SMS Services",
     "tagline": "Reminders and promotions that land straight in your customers' inbox",
@@ -236,7 +236,7 @@
   {
     "id": "cloud-services",
     "category": "Scale & Secure",
-    "icon": "07",
+    "icon": "10",
     "previewStyle": "cloud",
     "name": "Cloud Services & Migration",
     "tagline": "Google Workspace / Microsoft 365, backups, VPS setup",
@@ -267,7 +267,7 @@
   {
     "id": "server-management",
     "category": "Scale & Secure",
-    "icon": "13",
+    "icon": "11",
     "previewStyle": "terminal",
     "name": "Server Management & DevOps",
     "tagline": "Deployment, monitoring, and upkeep for systems already in production",
@@ -293,7 +293,7 @@
   {
     "id": "network-security",
     "category": "Scale & Secure",
-    "icon": "08",
+    "icon": "12",
     "previewStyle": "network",
     "name": "Network Setup & Security",
     "tagline": "Full network builds for SMEs to large-scale, multi-site sites — plus security audits",
@@ -324,7 +324,7 @@
   {
     "id": "network-management",
     "category": "Scale & Secure",
-    "icon": "15",
+    "icon": "13",
     "previewStyle": "network",
     "name": "Network Management",
     "tagline": "Ongoing monitoring and support for networks already in place",
@@ -350,7 +350,7 @@
   {
     "id": "cctv",
     "category": "Scale & Secure",
-    "icon": "09",
+    "icon": "14",
     "previewStyle": "camera",
     "name": "CCTV & Security",
     "tagline": "Camera installs and basic security audits for shops and offices",
@@ -366,7 +366,7 @@
   {
     "id": "enterprise-systems",
     "category": "Enterprise & Scale",
-    "icon": "14",
+    "icon": "15",
     "previewStyle": "enterprise",
     "name": "Large-Scale & Enterprise Systems",
     "tagline": "Infrastructure and custom systems built for high user volumes and multi-branch operations",
