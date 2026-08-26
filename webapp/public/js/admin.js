@@ -256,6 +256,25 @@
   // ================= SERVICES =================
   let ALL_SERVICES = [];
   let svcPricingRows = 0;
+  // Keep in sync with the <select id="svc-preview-style"> options in
+  // admin.html and the PREVIEW_STYLES map in public/js/app.js.
+  const PREVIEW_STYLE_LABELS = {
+    auto: 'Auto (by category)',
+    browser: 'Website mockup',
+    app: 'App / web-app screen',
+    dashboard: 'Support dashboard',
+    crm: 'CRM board',
+    terminal: 'Deploy / server terminal',
+    network: 'Network diagram',
+    camera: 'CCTV camera grid',
+    receipt: 'POS receipt',
+    chat: 'SMS thread',
+    cloud: 'Cloud sync',
+    diagnostic: 'Hardware diagnostic panel',
+    recovery: 'Data recovery progress',
+    checklist: 'Install checklist',
+    enterprise: 'Multi-site scale diagram',
+  };
   function addPricingRow(prefill){
     svcPricingRows++;
     const wrap = document.createElement('div');
@@ -290,7 +309,7 @@
       <div class="svc-admin-row">
         <div>
           <b>${esc(s.name)}</b>
-          <div class="meta">${esc(s.category)} · ${s.pricing.length} pricing tier${s.pricing.length===1?'':'s'}</div>
+          <div class="meta">${esc(s.category)} · ${s.pricing.length} pricing tier${s.pricing.length===1?'':'s'} · Preview: ${esc(PREVIEW_STYLE_LABELS[s.previewStyle] || PREVIEW_STYLE_LABELS.auto)}</div>
         </div>
         <div class="admin-toolbar">
           <button class="admin-btn" data-edit-svc="${esc(s.id)}">Edit</button>
@@ -318,6 +337,7 @@
       document.getElementById('svc-icon').value = s.icon || '';
       document.getElementById('svc-tagline').value = s.tagline || '';
       document.getElementById('svc-description').value = s.description || '';
+      document.getElementById('svc-preview-style').value = s.previewStyle || 'auto';
       document.getElementById('svc-pricing-rows').innerHTML = '';
       (s.pricing || []).forEach(p => addPricingRow(p));
       if (!s.pricing || !s.pricing.length) addPricingRow();
@@ -352,6 +372,7 @@
       icon: document.getElementById('svc-icon').value.trim(),
       tagline: document.getElementById('svc-tagline').value.trim(),
       description: document.getElementById('svc-description').value.trim(),
+      previewStyle: document.getElementById('svc-preview-style').value,
       pricing,
     };
 

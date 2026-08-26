@@ -36,6 +36,28 @@ const { sendEmail, isEmailConfigured } = require("./lib/email");
 
 const PORT = process.env.PORT || 3000;
 
+// Live-preview mockup styles selectable per service in the admin panel
+// (Services CMS) and rendered on the public "Our Work" page. Keep this in
+// sync with the <select id="svc-preview-style"> options in admin.html and
+// the PREVIEW_STYLES map in public/js/app.js.
+const PREVIEW_STYLES = [
+  "auto",
+  "browser",
+  "app",
+  "dashboard",
+  "crm",
+  "terminal",
+  "network",
+  "camera",
+  "receipt",
+  "chat",
+  "cloud",
+  "diagnostic",
+  "recovery",
+  "checklist",
+  "enterprise",
+];
+
 // A custom header that a plain cross-site <form> POST cannot set, and that
 // a cross-origin fetch() can only set after a CORS preflight — which this
 // server never approves (no Access-Control-Allow-Origin is ever sent). So
@@ -663,6 +685,7 @@ const server = http.createServer(async (req, res) => {
         name: cleanText(body.name, 200),
         tagline: cleanText(body.tagline, 300),
         description: cleanText(body.description, 3000),
+        previewStyle: PREVIEW_STYLES.includes(body.previewStyle) ? body.previewStyle : "auto",
         pricing: Array.isArray(body.pricing)
           ? body.pricing.slice(0, 20).map((p) => ({
               label: cleanText(p.label, 100),
@@ -691,6 +714,7 @@ const server = http.createServer(async (req, res) => {
         name: cleanText(body.name, 200) || services[idx].name,
         tagline: cleanText(body.tagline, 300),
         description: cleanText(body.description, 3000),
+        previewStyle: PREVIEW_STYLES.includes(body.previewStyle) ? body.previewStyle : services[idx].previewStyle || "auto",
         pricing: Array.isArray(body.pricing)
           ? body.pricing.slice(0, 20).map((p) => ({
               label: cleanText(p.label, 100),

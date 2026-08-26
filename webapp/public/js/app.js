@@ -104,13 +104,19 @@
 
   function serviceCard(s) {
     const fromPrice = s.pricing && s.pricing[0] ? s.pricing[0].price : "";
+    const style = resolvePreviewStyle(s);
     return `
       <button class="svc-card" data-open-service="${esc(s.id)}">
-        <div class="icon">${esc(s.icon)}</div>
-        <h3>${esc(s.name)}</h3>
-        <p>${esc(s.tagline)}</p>
-        ${fromPrice ? `<div class="from">From ${esc(fromPrice)}</div>` : ""}
-        <span class="arrow">View details &amp; pricing &rarr;</span>
+        <div class="svc-card-media">
+          <span class="svc-card-num">${esc(s.icon)}</span>
+          ${previewMock(style)}
+        </div>
+        <div class="svc-card-body">
+          <h3>${esc(s.name)}</h3>
+          <p>${esc(s.tagline)}</p>
+          ${fromPrice ? `<div class="from">From ${esc(fromPrice)}</div>` : ""}
+          <span class="arrow">View details &amp; pricing &rarr;</span>
+        </div>
       </button>
     `;
   }
@@ -172,6 +178,8 @@
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-open-service]");
     if (btn) openServiceModal(btn.getAttribute("data-open-service"));
+    const previewBtn = e.target.closest("[data-open-preview]");
+    if (previewBtn) openLivePreviewModal(previewBtn.getAttribute("data-open-preview"));
   });
 
   // ---------- floating WhatsApp popover (custom message) ----------
@@ -270,31 +278,460 @@
     `;
   }
 
+  /**
+   * Same grid-of-cells illustration as before, but each cell now loops a
+   * subtle highlight animation on a staggered delay — reads as a slow
+   * diagonal scan drifting across the grid rather than a static pattern.
+   */
   function illustrationDiagnostic() {
     const cells = [];
     const cols = 10;
     const rows = 3;
     const gap = 10;
     const size = 34;
-    const highlighted = new Set(["2-0", "5-1", "7-0", "1-2", "8-2", "4-1"]);
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const key = `${c}-${r}`;
-        const isHi = highlighted.has(key);
         const x = c * (size + gap);
         const y = r * (size + gap);
-        cells.push(
-          `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="6" fill="${
-            isHi ? "#38BDF8" : "#0A1F3D"
-          }" opacity="${isHi ? "0.9" : "0.08"}"/>`
-        );
+        const delay = ((c * 0.22 + r * 0.6) % 3.6).toFixed(2);
+        cells.push(`<rect class="diag-cell" x="${x}" y="${y}" width="${size}" height="${size}" rx="6" style="animation-delay:${delay}s"/>`);
       }
     }
     return `
-      <svg class="page-illustration" viewBox="0 0 476 132" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <svg class="page-illustration diag-illustration" viewBox="0 0 476 132" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         ${cells.join("")}
       </svg>
     `;
+  }
+
+  // ---------- "Our Work" live service preview mockups ----------
+  // Keep PREVIEW_STYLES in sync with server.js's PREVIEW_STYLES allowlist
+  // and the <select id="svc-preview-style"> options in admin.html — admins
+  // pick one of these per service in the Services CMS; "auto" (or an
+  // unrecognized/missing value) falls back to the maps below.
+  const PREVIEW_STYLES = [
+    "browser", "app", "dashboard", "crm", "terminal", "network",
+    "camera", "receipt", "chat", "cloud", "diagnostic", "recovery",
+    "checklist", "enterprise",
+  ];
+  const DEFAULT_PREVIEW_STYLE_BY_ID = {
+    "hardware-repair": "diagnostic",
+    "managed-it": "dashboard",
+    "data-recovery": "recovery",
+    "software-install": "checklist",
+    "websites": "browser",
+    "web-apps": "app",
+    "pos-systems": "receipt",
+    "crm-systems": "crm",
+    "bulk-sms": "chat",
+    "cloud-services": "cloud",
+    "server-management": "terminal",
+    "network-security": "network",
+    "network-management": "network",
+    "cctv": "camera",
+    "enterprise-systems": "enterprise",
+  };
+  const DEFAULT_PREVIEW_STYLE_BY_CATEGORY = {
+    "Fix & Support": "diagnostic",
+    "Build & Grow": "browser",
+    "Scale & Secure": "network",
+    "Enterprise & Scale": "enterprise",
+  };
+
+  function resolvePreviewStyle(s) {
+    if (s.previewStyle && PREVIEW_STYLES.includes(s.previewStyle)) return s.previewStyle;
+    return DEFAULT_PREVIEW_STYLE_BY_ID[s.id] || DEFAULT_PREVIEW_STYLE_BY_CATEGORY[s.category] || "browser";
+  }
+
+  function previewMockSvg(kind) {
+    if (kind === "network") {
+      return `
+        <svg class="mock-svg" viewBox="0 0 160 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="80" y1="55" x2="24" y2="20" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <line x1="80" y1="55" x2="24" y2="90" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <line x1="80" y1="55" x2="136" y2="20" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <line x1="80" y1="55" x2="136" y2="90" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <circle cx="24" cy="20" r="7" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+          <circle cx="24" cy="90" r="7" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+          <circle cx="136" cy="20" r="7" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+          <circle cx="136" cy="90" r="7" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+          <circle cx="80" cy="55" r="16" fill="#FF7A33"/>
+        </svg>`;
+    }
+    if (kind === "cloud") {
+      return `
+        <svg class="mock-svg" viewBox="0 0 160 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M45 72a19 19 0 0 1-3-37.7A25 25 0 0 1 89 25a21 21 0 0 1 25 27 17 17 0 0 1-3 33H45Z" fill="#0A1F3D" opacity="0.07" stroke="#38BDF8" stroke-width="1.5"/>
+          <path d="M80 44v22m0 0-9-9m9 9 9-9" stroke="#FF7A33" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+    }
+    if (kind === "enterprise") {
+      return `
+        <svg class="mock-svg" viewBox="0 0 160 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="80" y1="24" x2="30" y2="58" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <line x1="80" y1="24" x2="80" y2="58" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <line x1="80" y1="24" x2="130" y2="58" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <line x1="30" y1="58" x2="30" y2="88" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <line x1="80" y1="58" x2="80" y2="88" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <line x1="130" y1="58" x2="130" y2="88" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+          <circle cx="80" cy="24" r="10" fill="#FF7A33"/>
+          <circle cx="30" cy="58" r="7" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+          <circle cx="80" cy="58" r="7" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+          <circle cx="130" cy="58" r="7" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+          <rect x="22" y="84" width="16" height="10" rx="2" fill="#38BDF8" opacity="0.6"/>
+          <rect x="72" y="84" width="16" height="10" rx="2" fill="#38BDF8" opacity="0.6"/>
+          <rect x="122" y="84" width="16" height="10" rx="2" fill="#38BDF8" opacity="0.6"/>
+        </svg>`;
+    }
+    return "";
+  }
+
+  function previewMock(kind) {
+    switch (kind) {
+      case "browser":
+        return `
+          <div class="mock mock-browser">
+            <div class="mb-bar"><span></span><span></span><span></span><div class="mb-url"></div></div>
+            <div class="mb-hero"></div>
+            <div class="mb-line w1"></div><div class="mb-line w2"></div>
+            <div class="mb-btn"></div>
+          </div>`;
+      case "app":
+        return `
+          <div class="mock mock-app">
+            <div class="ma-bar"></div>
+            <div class="ma-row"><span class="ma-ic"></span><div class="ma-lines"><div class="ma-line w1"></div><div class="ma-line w2"></div></div></div>
+            <div class="ma-row"><span class="ma-ic"></span><div class="ma-lines"><div class="ma-line w1"></div><div class="ma-line w2"></div></div></div>
+            <div class="ma-row"><span class="ma-ic"></span><div class="ma-lines"><div class="ma-line w1"></div><div class="ma-line w2"></div></div></div>
+            <div class="ma-nav"><span></span><span class="on"></span><span></span></div>
+          </div>`;
+      case "dashboard":
+        return `
+          <div class="mock mock-dash">
+            <div class="md-stats"><div class="md-stat"></div><div class="md-stat"></div><div class="md-stat"></div></div>
+            <div class="md-bars"><span style="height:40%"></span><span style="height:72%"></span><span style="height:55%"></span><span style="height:85%"></span><span style="height:62%"></span></div>
+          </div>`;
+      case "crm":
+        return `
+          <div class="mock mock-crm">
+            <div class="mc-col"><div class="mc-card"></div><div class="mc-card"></div></div>
+            <div class="mc-col"><div class="mc-card"></div></div>
+            <div class="mc-col"><div class="mc-card"></div><div class="mc-card"></div><div class="mc-card"></div></div>
+          </div>`;
+      case "terminal":
+        return `
+          <div class="mock mock-term">
+            <div class="mt-line w1"></div><div class="mt-line w2"></div><div class="mt-line w3"></div>
+            <div class="mt-ok">&check; deployed</div>
+          </div>`;
+      case "camera":
+        return `
+          <div class="mock mock-cam">
+            <div class="mcam-tile"><span class="rec"></span></div>
+            <div class="mcam-tile"><span class="rec"></span></div>
+            <div class="mcam-tile"><span class="rec"></span></div>
+            <div class="mcam-tile"><span class="rec"></span></div>
+          </div>`;
+      case "receipt":
+        return `
+          <div class="mock mock-receipt">
+            <div class="mr-line w1"></div><div class="mr-line w2"></div><div class="mr-line w1"></div>
+            <div class="mr-total">TOTAL</div>
+          </div>`;
+      case "chat":
+        return `
+          <div class="mock mock-chat">
+            <div class="mch-bubble">Reminder: appt tomorrow 10am</div>
+            <div class="mch-bubble">Your invoice is ready</div>
+            <div class="mch-sent">&check; Sent to 248 contacts</div>
+          </div>`;
+      case "diagnostic":
+        return `
+          <div class="mock mock-diag">
+            <div class="mdg-screen"><div class="mdg-ring"></div></div>
+            <div class="mdg-checks"><span>&check; Power</span><span>&check; RAM</span><span>&hellip; Boot</span></div>
+          </div>`;
+      case "recovery":
+        return `
+          <div class="mock mock-recov">
+            <div class="mrv-drive"></div>
+            <div class="mrv-bar"><span style="width:72%"></span></div>
+            <div class="mrv-label">Recovering files&hellip; 72%</div>
+          </div>`;
+      case "checklist":
+        return `
+          <div class="mock mock-checklist">
+            <div class="mcl-row done">OS installed</div>
+            <div class="mcl-row done">Drivers configured</div>
+            <div class="mcl-row">Office suite</div>
+          </div>`;
+      default:
+        return `<div class="mock mock-svg-wrap">${previewMockSvg(kind)}</div>`;
+    }
+  }
+
+  function previewCard(s) {
+    const style = resolvePreviewStyle(s);
+    const bookUrl = `#/book?service=${encodeURIComponent(s.id)}&tab=book`;
+    const quoteUrl = `#/book?service=${encodeURIComponent(s.id)}&tab=quote`;
+    return `
+      <div class="preview-card">
+        <div class="preview-mock-wrap" data-open-preview="${esc(s.id)}">
+          ${previewMock(style)}
+          <div class="preview-mock-hint">Click for a bigger live preview &rarr;</div>
+        </div>
+        <div class="preview-body">
+          <h4>${esc(s.name)}</h4>
+          <p>${esc(s.tagline)}</p>
+          <div class="preview-actions">
+            <a href="${bookUrl}" class="btn-mini btn-mini-primary">Book a callout</a>
+            <a href="${quoteUrl}" class="btn-mini">Get a quote</a>
+          </div>
+          <button type="button" class="preview-detail-link" data-open-service="${esc(s.id)}">View full pricing &rarr;</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ---------- detailed, full-size live previews (bigger modal view) ----------
+  // A handful of the most "product-shaped" services get a bespoke, richer
+  // mockup here so a potential client gets a real sense of the actual
+  // screens involved, not just the small teaser tile. Every other style
+  // falls back to its teaser mock, scaled up, so nothing is left blank.
+  function detailedBrowserMock() {
+    return `
+      <div class="lp-browser">
+        <div class="lpb-chrome"><span></span><span></span><span></span><div class="lpb-url">yourbusiness.co.ke</div></div>
+        <div class="lpb-nav">
+          <div class="lpb-logo"></div>
+          <div class="lpb-links"><span>Home</span><span>Services</span><span>About</span><span>Contact</span></div>
+          <div class="lpb-cta">Book Now</div>
+        </div>
+        <div class="lpb-hero">
+          <div class="lpb-hero-text">
+            <div class="lpb-h1"></div>
+            <div class="lpb-h1 w2"></div>
+            <div class="lpb-sub"></div>
+            <div class="lpb-btns"><span class="a"></span><span class="b"></span></div>
+          </div>
+          <div class="lpb-hero-art"></div>
+        </div>
+        <div class="lpb-features">
+          <div class="lpb-feat"><span class="ic"></span><div class="lpb-line"></div><div class="lpb-line w2"></div></div>
+          <div class="lpb-feat"><span class="ic"></span><div class="lpb-line"></div><div class="lpb-line w2"></div></div>
+          <div class="lpb-feat"><span class="ic"></span><div class="lpb-line"></div><div class="lpb-line w2"></div></div>
+        </div>
+      </div>`;
+  }
+
+  function detailedAppMock() {
+    return `
+      <div class="lp-app">
+        <div class="lpa-phone">
+          <div class="lpa-status"><span></span><span></span></div>
+          <div class="lpa-topbar">Bookings</div>
+          <div class="lpa-stats">
+            <div class="lpa-stat"><b>12</b><small>Today</small></div>
+            <div class="lpa-stat"><b>3</b><small>Pending</small></div>
+            <div class="lpa-stat"><b>98%</b><small>On time</small></div>
+          </div>
+          <div class="lpa-list">
+            <div class="lpa-row"><span class="avatar"></span><div class="lines"><div class="l1"></div><div class="l2"></div></div><span class="tag ok">Done</span></div>
+            <div class="lpa-row"><span class="avatar"></span><div class="lines"><div class="l1"></div><div class="l2"></div></div><span class="tag pending">Pending</span></div>
+            <div class="lpa-row"><span class="avatar"></span><div class="lines"><div class="l1"></div><div class="l2"></div></div><span class="tag ok">Done</span></div>
+          </div>
+          <div class="lpa-fab-row"><div class="lpa-fab">+</div></div>
+          <div class="lpa-tabbar"><span></span><span class="on"></span><span></span><span></span></div>
+        </div>
+      </div>`;
+  }
+
+  function detailedCrmMock() {
+    return `
+      <div class="lp-crm">
+        <div class="lpc-toolbar"><div class="lpc-search">Search contacts&hellip;</div><div class="lpc-add">+ Add lead</div></div>
+        <div class="lpc-board">
+          <div class="lpc-col">
+            <div class="lpc-col-head">New leads <span>4</span></div>
+            <div class="lpc-card"><div class="lpc-avatar">JN</div><div class="lpc-line"></div><div class="lpc-amt">KSh 40,000</div></div>
+            <div class="lpc-card"><div class="lpc-avatar">MW</div><div class="lpc-line"></div><div class="lpc-amt">KSh 15,000</div></div>
+          </div>
+          <div class="lpc-col">
+            <div class="lpc-col-head">Contacted <span>2</span></div>
+            <div class="lpc-card"><div class="lpc-avatar">SK</div><div class="lpc-line"></div><div class="lpc-amt">KSh 90,000</div></div>
+          </div>
+          <div class="lpc-col">
+            <div class="lpc-col-head">Won <span>1</span></div>
+            <div class="lpc-card done"><div class="lpc-avatar">RT</div><div class="lpc-line"></div><div class="lpc-amt">KSh 120,000</div></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function detailedPosMock() {
+    return `
+      <div class="lp-pos">
+        <div class="lpp-products">
+          <div class="lpp-tabs"><span class="on">Drinks</span><span>Food</span><span>Other</span></div>
+          <div class="lpp-grid">
+            <div class="lpp-item"><span class="ic"></span>Soda<b>KSh 60</b></div>
+            <div class="lpp-item"><span class="ic"></span>Water<b>KSh 50</b></div>
+            <div class="lpp-item"><span class="ic"></span>Chips<b>KSh 150</b></div>
+            <div class="lpp-item"><span class="ic"></span>Chapati<b>KSh 30</b></div>
+            <div class="lpp-item"><span class="ic"></span>Tea<b>KSh 40</b></div>
+            <div class="lpp-item"><span class="ic"></span>Combo<b>KSh 250</b></div>
+          </div>
+        </div>
+        <div class="lpp-cart">
+          <div class="lpp-cart-row"><span>Soda &times;2</span><span>KSh 120</span></div>
+          <div class="lpp-cart-row"><span>Chapati &times;4</span><span>KSh 120</span></div>
+          <div class="lpp-cart-row"><span>Combo &times;1</span><span>KSh 250</span></div>
+          <div class="lpp-total-row"><span>Total</span><span>KSh 490</span></div>
+          <div class="lpp-pay">Charge KSh 490</div>
+        </div>
+      </div>`;
+  }
+
+  function detailedDashboardMock() {
+    return `
+      <div class="lp-dash-full">
+        <div class="lpd-top"><b>Support Dashboard</b><span class="lpd-status">&bull; All systems healthy</span></div>
+        <div class="lpd-stats">
+          <div class="lpd-stat"><b>7</b><small>Open tickets</small></div>
+          <div class="lpd-stat"><b>42</b><small>Devices monitored</small></div>
+          <div class="lpd-stat"><b>99.8%</b><small>Uptime</small></div>
+          <div class="lpd-stat"><b>18m</b><small>Avg response</small></div>
+        </div>
+        <div class="lpd-table">
+          <div class="lpd-row head"><span>Device</span><span>Issue</span><span>Status</span></div>
+          <div class="lpd-row"><span>Reception PC</span><span>Slow startup</span><span class="tag pending">In progress</span></div>
+          <div class="lpd-row"><span>Office Router</span><span>Firmware update</span><span class="tag ok">Resolved</span></div>
+          <div class="lpd-row"><span>POS Terminal 2</span><span>Printer offline</span><span class="tag new">New</span></div>
+        </div>
+      </div>`;
+  }
+
+  function detailedNetworkMock() {
+    return `
+      <svg class="lp-network-svg" viewBox="0 0 640 260" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="320" y1="50" x2="180" y2="140" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+        <line x1="320" y1="50" x2="460" y2="140" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+        <line x1="180" y1="140" x2="90" y2="220" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+        <line x1="180" y1="140" x2="230" y2="220" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+        <line x1="460" y1="140" x2="410" y2="220" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+        <line x1="460" y1="140" x2="550" y2="220" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="320" cy="50" r="20" fill="#FF7A33"/>
+        <text x="320" y="55" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="#0A1F3D">RTR</text>
+        <circle cx="180" cy="140" r="14" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="460" cy="140" r="14" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="90" cy="220" r="10" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="230" cy="220" r="10" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="410" cy="220" r="10" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <circle cx="550" cy="220" r="10" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
+        <text x="180" y="118" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="#B9C6DA">Switch A</text>
+        <text x="460" y="118" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="#B9C6DA">Switch B</text>
+        <text x="90" y="245" text-anchor="middle" font-size="9.5" font-family="IBM Plex Mono, monospace" fill="#B9C6DA">Office</text>
+        <text x="230" y="245" text-anchor="middle" font-size="9.5" font-family="IBM Plex Mono, monospace" fill="#B9C6DA">Guest Wi-Fi</text>
+        <text x="410" y="245" text-anchor="middle" font-size="9.5" font-family="IBM Plex Mono, monospace" fill="#B9C6DA">Reception</text>
+        <text x="550" y="245" text-anchor="middle" font-size="9.5" font-family="IBM Plex Mono, monospace" fill="#B9C6DA">CCTV</text>
+      </svg>`;
+  }
+
+  function detailedCloudMock() {
+    return `
+      <div class="lp-cloud">
+        <svg class="lp-cloud-svg" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M55 84a22 22 0 0 1-4-43.6A29 29 0 0 1 106 29a25 25 0 0 1 29 32 20 20 0 0 1-4 39H55Z" fill="#0A1F3D" opacity="0.06" stroke="#38BDF8" stroke-width="1.5"/>
+          <path d="M100 50v28m0 0-10-10m10 10 10-10" stroke="#FF7A33" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="lpcl-chips"><span>Gmail &rarr; Workspace</span><span>Files &rarr; Drive</span><span>Auto backup</span></div>
+        <div class="lpcl-progress"><div class="lpcl-bar"><span style="width:80%"></span></div><small>Migrating 12 of 15 mailboxes&hellip;</small></div>
+      </div>`;
+  }
+
+  function detailedCameraMock() {
+    const labels = ["Entrance", "Till Area", "Stock Room", "Parking"];
+    return `
+      <div class="lp-cam-full">
+        <div class="lpcam-grid-full">
+          ${labels
+            .map(
+              (label, i) => `
+            <div class="lpcam-tile-full">
+              <span class="live">&bull; LIVE</span>
+              <span class="label">${label}</span>
+              ${i === 1 ? '<span class="motion">Motion detected</span>' : ""}
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      </div>`;
+  }
+
+  function detailedPreviewMock(style) {
+    switch (style) {
+      case "browser":
+        return detailedBrowserMock();
+      case "app":
+        return detailedAppMock();
+      case "crm":
+        return detailedCrmMock();
+      case "receipt":
+        return detailedPosMock();
+      case "dashboard":
+        return detailedDashboardMock();
+      case "network":
+        return detailedNetworkMock();
+      case "cloud":
+        return detailedCloudMock();
+      case "camera":
+        return detailedCameraMock();
+      default:
+        return `<div class="lp-stage-simple">${previewMock(style)}</div>`;
+    }
+  }
+
+  function openLivePreviewModal(id) {
+    const s = SERVICES.find((x) => x.id === id);
+    if (!s) return;
+    const style = resolvePreviewStyle(s);
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.innerHTML = `
+      <div class="modal modal-lg" role="dialog" aria-modal="true">
+        <button class="modal-close" aria-label="Close">&times;</button>
+        <div class="cat-pill">${esc(s.category)}</div>
+        <h2>${esc(s.name)}</h2>
+        <div class="tagline">${esc(s.tagline)}</div>
+        <div class="lp-stage">${detailedPreviewMock(style)}</div>
+        <div class="lp-note">Illustrative preview &mdash; the real result is scoped and built around your business.</div>
+        <div class="lp-modal-actions">
+          <a href="#/book?service=${encodeURIComponent(s.id)}&tab=book" class="btn btn-primary">Book this service &rarr;</a>
+          <a href="#/book?service=${encodeURIComponent(s.id)}&tab=quote" class="btn btn-ghost-light">Get a quote</a>
+          <button type="button" class="lp-pricing-link" data-open-service="${esc(s.id)}">See full pricing &rarr;</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+    document.body.style.overflow = "hidden";
+
+    function close() {
+      backdrop.remove();
+      document.body.style.overflow = "";
+    }
+    backdrop.querySelector(".modal-close").addEventListener("click", close);
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop) close();
+    });
+    backdrop.querySelectorAll('a[href^="#/book"]').forEach((a) => a.addEventListener("click", close));
+    backdrop.querySelector("[data-open-service]").addEventListener("click", close);
+    document.addEventListener("keydown", function onEsc(e) {
+      if (e.key === "Escape") {
+        close();
+        document.removeEventListener("keydown", onEsc);
+      }
+    });
   }
 
   function illustrationPartnership() {
@@ -487,8 +924,22 @@
           <p>A look at the kind of problems we solve. Client identities are kept private unless we have permission to share them.</p>
         </div>
       </header>
-      <section class="section">
+      <section class="section" style="padding-bottom:44px;">
         <div class="wrap">
+          <div class="section-tag">// Live Service Previews</div>
+          <h2>See what we'd build for you</h2>
+          <p class="intro">A quick look at each service before you book a callout or request a quote. Tap any preview for full pricing.</p>
+          <div id="service-preview-list">
+            <div class="loading-row">Loading previews…</div>
+          </div>
+        </div>
+      </section>
+      <section class="section" style="padding-top:0;">
+        <div class="wrap">
+          <div class="illustration-caption">
+            <div class="section-tag">// Live diagnostics feed</div>
+            <p>A running snapshot of the checks, builds, and monitoring happening behind the scenes.</p>
+          </div>
           <div class="illustration-wrap">${illustrationDiagnostic()}</div>
           <div id="clients-grid">
             <div class="loading-row">Loading…</div>
@@ -496,7 +947,18 @@
         </div>
       </section>
     `;
-    const clients = await loadClients();
+    const [clients, services] = await Promise.all([loadClients(), loadServices()]);
+
+    const previewList = document.getElementById("service-preview-list");
+    previewList.innerHTML = groupByCategory(services)
+      .map(
+        ([cat, list]) => `
+        <div class="cat-label">${esc(cat)}</div>
+        <div class="preview-grid">${list.map(previewCard).join("")}</div>
+      `
+      )
+      .join("");
+
     const container = document.getElementById("clients-grid");
     container.innerHTML = `
       <div class="case-grid">

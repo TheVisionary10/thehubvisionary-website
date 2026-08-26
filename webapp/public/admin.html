@@ -246,6 +246,26 @@
             </div>
             <div class="admin-field"><label>Description</label><textarea id="svc-description" rows="3"></textarea></div>
             <div class="admin-field">
+              <label>Live preview style (Our Work page)</label>
+              <select id="svc-preview-style">
+                <option value="auto">Auto (based on category)</option>
+                <option value="browser">Website mockup (browser window)</option>
+                <option value="app">App / web-app screen</option>
+                <option value="dashboard">Support dashboard</option>
+                <option value="crm">CRM board</option>
+                <option value="terminal">Deploy / server terminal</option>
+                <option value="network">Network diagram</option>
+                <option value="camera">CCTV camera grid</option>
+                <option value="receipt">POS receipt</option>
+                <option value="chat">SMS thread</option>
+                <option value="cloud">Cloud sync</option>
+                <option value="diagnostic">Hardware diagnostic panel</option>
+                <option value="recovery">Data recovery progress</option>
+                <option value="checklist">Install checklist</option>
+                <option value="enterprise">Multi-site scale diagram</option>
+              </select>
+            </div>
+            <div class="admin-field">
               <label>Pricing tiers</label>
               <div id="svc-pricing-rows"></div>
               <button type="button" class="admin-btn" id="svc-add-pricing">+ Add pricing row</button>
