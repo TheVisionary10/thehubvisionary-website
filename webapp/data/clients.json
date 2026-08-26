@@ -119,10 +119,87 @@
     "service": "POS Systems"
   },
   {
-    "id": "_note",
-    "sector": "Add your real clients here",
-    "title": "This file is easy to edit",
-    "summary": "Replace these anonymized case studies with named clients, logos, and testimonials once you have their permission to feature them — just edit data/clients.json.",
-    "service": "—"
+    "id": "case-18",
+    "sector": "Electronics retailer",
+    "title": "Custom inventory & stock management web app",
+    "summary": "Built a web app to track stock levels, supplier orders, and low-stock alerts across a single storefront, replacing a spreadsheet that three staff were editing separately and constantly overwriting each other's changes.",
+    "service": "Web App Development"
+  },
+  {
+    "id": "case-19",
+    "sector": "Salon chain, 3 branches",
+    "title": "Booking and staff scheduling web app",
+    "summary": "Built a web app for clients to book appointments online and for managers to see staff schedules across all three branches from one screen, cutting down on double-bookings and phone-tag.",
+    "service": "Web App Development"
+  },
+  {
+    "id": "case-20",
+    "sector": "Fashion retailer",
+    "title": "E-commerce store with M-Pesa checkout",
+    "summary": "Built an online store with a product catalogue, cart, and M-Pesa checkout integration, giving a shop that previously sold only through Instagram DMs a proper website customers could order from directly.",
+    "service": "Website Design & Development"
+  },
+  {
+    "id": "case-21",
+    "sector": "Business consultancy",
+    "title": "Multi-page company site with a blog",
+    "summary": "Designed and built a multi-page site with a blog section the client's team could update themselves, replacing a single-page site that hadn't been touched in two years.",
+    "service": "Website Design & Development"
+  },
+  {
+    "id": "case-22",
+    "sector": "Real estate agency",
+    "title": "CRM with WhatsApp-linked lead tracking",
+    "summary": "Set up a CRM that logs enquiries and tags them by property interest, with a WhatsApp click-to-chat link on every lead so agents can follow up in one tap instead of hunting through old chats.",
+    "service": "CRM Systems"
+  },
+  {
+    "id": "case-23",
+    "sector": "Supermarket, 4 tills",
+    "title": "Multi-till POS with a shared stock count",
+    "summary": "Built a POS system running across four till stations that all read from one shared stock count in real time, so a sale at any till updates inventory everywhere instead of each till tracking stock separately.",
+    "service": "POS Systems"
+  },
+  {
+    "id": "case-24",
+    "sector": "SaaS startup, small team",
+    "title": "Zero-downtime migration to a new VPS",
+    "summary": "Migrated a client's existing web app from an aging shared host to a new VPS, staging the cutover with a maintenance-window DNS switch so the app stayed reachable throughout.",
+    "service": "Server Management & DevOps"
+  },
+  {
+    "id": "case-25",
+    "sector": "Multi-branch retailer, 5 branches",
+    "title": "Centralized sales reporting dashboard",
+    "summary": "Built a dashboard pulling daily sales figures from five branches into one view for the owner, replacing a routine of calling each branch manager individually every evening for numbers.",
+    "service": "Large-Scale & Enterprise Systems"
+  },
+  {
+    "id": "case-26",
+    "sector": "Small law firm",
+    "title": "Automated backup for client case files",
+    "summary": "Set up automated nightly backups of client case files and correspondence to the cloud, closing a gap where the only copy of years of records lived on one office PC.",
+    "service": "Cloud Services & Migration"
+  },
+  {
+    "id": "case-27",
+    "sector": "Co-working space",
+    "title": "IT support retainer for shared equipment",
+    "summary": "Set up a support retainer covering shared printers, meeting-room displays, and the guest Wi-Fi network, with a same-day response window since equipment downtime affects every member at once.",
+    "service": "Managed IT Support"
+  },
+  {
+    "id": "case-28",
+    "sector": "Fintech startup office",
+    "title": "VLAN segmentation for a growing office",
+    "summary": "Rebuilt a flat office network into separated VLANs for staff, guests, and payment-related devices, closing off unnecessary access between them ahead of a compliance review.",
+    "service": "Network Setup & Security"
+  },
+  {
+    "id": "case-29",
+    "sector": "Retail chain, promo campaign",
+    "title": "Promotional SMS campaign for a seasonal sale",
+    "summary": "Set up a one-off bulk SMS campaign announcing a seasonal sale to an existing customer list, including sender ID setup and message scheduling so it landed at the right time.",
+    "service": "Bulk SMS Services"
   }
 ]

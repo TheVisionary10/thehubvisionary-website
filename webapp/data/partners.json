@@ -4,5 +4,45 @@
     "name": "Single Cell Communication",
     "category": "Network Partner",
     "description": "Network connectivity partner supporting TheHubVisionary's cloud, hosting, and network setup services."
+  },
+  {
+    "id": "_placeholder-hardware-supplier",
+    "name": "Add your hardware supplier",
+    "category": "Hardware Supplier",
+    "description": "Wherever you source replacement parts and equipment — screens, keyboards, RAM, SSDs, routers, cameras. Replace this with your actual supplier's name via the admin panel (Partners tab) once you're ready to credit them.",
+    "logoUrl": "",
+    "url": ""
+  },
+  {
+    "id": "_placeholder-payments",
+    "name": "Add your payments partner",
+    "category": "Payments",
+    "description": "Your M-Pesa till/paybill provider or payment gateway, if you'd like to credit them here.",
+    "logoUrl": "",
+    "url": ""
+  },
+  {
+    "id": "_placeholder-cloud-software",
+    "name": "Add your cloud/software partner",
+    "category": "Cloud & Software",
+    "description": "A Google Workspace or Microsoft 365 reseller, or a software licensing partner you work with.",
+    "logoUrl": "",
+    "url": ""
+  },
+  {
+    "id": "_placeholder-sms-gateway",
+    "name": "Add your SMS gateway provider",
+    "category": "Messaging",
+    "description": "The bulk SMS gateway behind your Bulk SMS Services offering (e.g. Africa's Talking, Host Pinnacle).",
+    "logoUrl": "",
+    "url": ""
+  },
+  {
+    "id": "_placeholder-hosting-domains",
+    "name": "Add your hosting/domains partner",
+    "category": "Hosting & Domains",
+    "description": "Where you register domains and host client websites, if you'd like to credit them here.",
+    "logoUrl": "",
+    "url": ""
   }
 ]
