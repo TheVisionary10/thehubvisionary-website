@@ -14,10 +14,12 @@
   let CLIENTS = [];
   let COUNTIES = [];
   let PARTNERS = [];
+  let FAQ = [];
   let servicesLoaded = false;
   let clientsLoaded = false;
   let countiesLoaded = false;
   let partnersLoaded = false;
+  let faqLoaded = false;
 
   // ---------- data fetching ----------
 
@@ -51,6 +53,14 @@
     PARTNERS = await res.json();
     partnersLoaded = true;
     return PARTNERS;
+  }
+
+  async function loadFaq() {
+    if (faqLoaded) return FAQ;
+    const res = await fetch("/api/faq");
+    FAQ = await res.json();
+    faqLoaded = true;
+    return FAQ;
   }
 
   // ---------- helpers ----------
@@ -282,25 +292,30 @@
    * the hero's boot sequence and grid background — no stock photography,
    * so nothing to license and everything matches automatically.
    */
-  function illustrationHub() {
+  /**
+   * A layered "tech stack" illustration for the About page — hardware,
+   * network, and cloud/software layers stacked on top of the business
+   * itself (the amber base layer), with small circuit-trace branches for
+   * texture. Distinct from the hub-and-spoke network diagram used
+   * elsewhere, but same line-based, no-stock-photography style.
+   */
+  function illustrationStack() {
     return `
       <svg class="page-illustration" viewBox="0 0 520 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <g opacity="0.5">
-          <line x1="260" y1="110" x2="90" y2="45" stroke="#38BDF8" stroke-width="1.5"/>
-          <line x1="260" y1="110" x2="90" y2="175" stroke="#38BDF8" stroke-width="1.5"/>
-          <line x1="260" y1="110" x2="260" y2="30" stroke="#38BDF8" stroke-width="1.5"/>
-          <line x1="260" y1="110" x2="430" y2="45" stroke="#38BDF8" stroke-width="1.5"/>
-          <line x1="260" y1="110" x2="430" y2="175" stroke="#38BDF8" stroke-width="1.5"/>
-          <line x1="260" y1="110" x2="260" y2="190" stroke="#38BDF8" stroke-width="1.5"/>
-        </g>
-        <circle cx="90" cy="45" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
-        <circle cx="90" cy="175" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
-        <circle cx="260" cy="30" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
-        <circle cx="430" cy="45" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
-        <circle cx="430" cy="175" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
-        <circle cx="260" cy="190" r="11" fill="#0A1F3D" stroke="#38BDF8" stroke-width="2"/>
-        <circle cx="260" cy="110" r="30" fill="#FF7A33"/>
-        <circle cx="260" cy="110" r="30" fill="none" stroke="#0A1F3D" stroke-width="1" opacity="0.15"/>
+        <line x1="260" y1="46" x2="260" y2="192" stroke="#38BDF8" stroke-width="1.5" opacity="0.35"/>
+        <rect x="160" y="20" width="200" height="34" rx="8" fill="#0A1F3D" opacity="0.08" stroke="#38BDF8" stroke-width="1.5"/>
+        <rect x="120" y="72" width="280" height="34" rx="8" fill="#0A1F3D" opacity="0.08" stroke="#38BDF8" stroke-width="1.5"/>
+        <rect x="90" y="124" width="340" height="34" rx="8" fill="#0A1F3D" opacity="0.08" stroke="#38BDF8" stroke-width="1.5"/>
+        <rect x="60" y="176" width="400" height="34" rx="8" fill="#FF7A33"/>
+        <circle cx="260" cy="37" r="4" fill="#38BDF8"/>
+        <circle cx="260" cy="89" r="4" fill="#38BDF8"/>
+        <circle cx="260" cy="141" r="4" fill="#38BDF8"/>
+        <line x1="360" y1="37" x2="392" y2="37" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="398" cy="37" r="3" fill="#38BDF8" opacity="0.7"/>
+        <line x1="120" y1="89" x2="88" y2="89" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="82" cy="89" r="3" fill="#38BDF8" opacity="0.7"/>
+        <line x1="430" y1="141" x2="462" y2="141" stroke="#38BDF8" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="468" cy="141" r="3" fill="#38BDF8" opacity="0.7"/>
       </svg>
     `;
   }
@@ -1565,7 +1580,8 @@
             (p) => `
           <div class="case-card partner-card">
             <div class="sector">${esc(p.category)}</div>
-            <h3>${esc(p.name)}</h3>
+            ${p.logoUrl ? `<img class="partner-logo" src="${esc(p.logoUrl)}" alt="${esc(p.name)} logo" loading="lazy">` : ""}
+            <h3>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.name)}</a>` : esc(p.name)}</h3>
             <p>${esc(p.description || "")}</p>
           </div>
         `
@@ -1588,7 +1604,7 @@
       </header>
       <section class="section">
         <div class="wrap" style="max-width:760px;">
-          <div class="illustration-wrap">${illustrationHub()}</div>
+          <div class="illustration-wrap">${illustrationStack()}</div>
           <p style="font-size:16px; color:var(--ink); line-height:1.75; margin-bottom:20px;">
             TheHubVisionary is a Nairobi-based IT services company covering everything from hands-on
             hardware repair to the systems that run a growing business — websites, web apps, POS and
@@ -1622,37 +1638,6 @@
 
   // ---------- page: FAQ ----------
 
-  const FAQ_ITEMS = [
-    {
-      q: "What areas do you cover?",
-      a: "We're based in Nairobi and cover all 47 counties in Kenya. Jobs within Nairobi use the standard per-service callout fee; jobs outside Nairobi include a distance-based travel fee — pick your county on the Book a Callout page to see an estimate before you submit."
-    },
-    {
-      q: "Do you charge a diagnostic fee?",
-      a: "For hardware repairs, yes — a small diagnostic fee (see the Hardware Repair service for the current amount) that's waived if you go ahead with the repair."
-    },
-    {
-      q: "Are the prices on the site final?",
-      a: "They're starting guides. Every job gets a clear, specific quote — confirmed before any work begins — based on the actual scope once we've heard the details."
-    },
-    {
-      q: "Do quoted prices include software licenses or hosting costs?",
-      a: "Where a job involves paid third-party software, hosting, domains, or gateway fees (common for websites, POS/CRM systems, and cloud setups), those are billed at cost and confirmed upfront — never bundled invisibly into the quote."
-    },
-    {
-      q: "How is the callout fee for locations outside Nairobi calculated?",
-      a: "It's based on actual distance from Nairobi — fuel, vehicle costs, and travel time — not a flat guess. Farther counties cost more, and very remote areas may need flights and accommodation, which we'll confirm with you directly."
-    },
-    {
-      q: "I need ongoing support, not just a one-time fix — what should I book?",
-      a: "Take a look at Managed IT Support, Network Management, or Server Management & DevOps on the Services page — these are monthly retainer options rather than one-off callouts."
-    },
-    {
-      q: "How do I book a callout?",
-      a: "Use the Book a Callout page — fill in your details, service, and county, and it goes straight into our system. We confirm by phone or WhatsApp, usually the same day."
-    }
-  ];
-
   async function renderFAQ() {
     app.innerHTML = `
       <header class="page-header">
@@ -1664,20 +1649,24 @@
       </header>
       <section class="section">
         <div class="wrap" style="max-width:760px;">
-          ${FAQ_ITEMS.map(
-            (item) => `
-            <div style="border-bottom:1px solid var(--line-light); padding:22px 0;">
-              <h3 style="font-family:var(--display); font-size:17px; color:var(--navy); margin-bottom:10px;">${esc(item.q)}</h3>
-              <p style="font-size:14.5px; color:var(--slate); line-height:1.65;">${esc(item.a)}</p>
-            </div>
-          `
-          ).join("")}
+          <div id="faq-list"><div class="loading-row">Loading&hellip;</div></div>
           <div style="margin-top:40px; text-align:center;">
             <a href="#/contact" class="btn btn-ghost-light">Ask us directly &rarr;</a>
           </div>
         </div>
       </section>
     `;
+    const faq = await loadFaq();
+    document.getElementById("faq-list").innerHTML = faq
+      .map(
+        (item) => `
+        <div style="border-bottom:1px solid var(--line-light); padding:22px 0;">
+          <h3 style="font-family:var(--display); font-size:17px; color:var(--navy); margin-bottom:10px;">${esc(item.q)}</h3>
+          <p style="font-size:14.5px; color:var(--slate); line-height:1.65;">${esc(item.a)}</p>
+        </div>
+      `
+      )
+      .join("");
   }
 
   // ---------- page: TERMS ----------

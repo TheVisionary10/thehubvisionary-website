@@ -274,6 +274,9 @@ nav .wrap{display:flex; align-items:center; justify-content:space-between; heigh
 .case-card.note{border-style:dashed; background:var(--paper);}
 .case-card.note h3{color:var(--slate);}
 .partner-card{border-left:3px solid var(--sky);}
+.partner-logo{display:block; max-height:40px; max-width:160px; margin-bottom:14px; object-fit:contain;}
+.partner-card h3 a{color:inherit; text-decoration:underline; text-decoration-color:var(--line-light); text-underline-offset:3px;}
+.partner-card h3 a:hover{text-decoration-color:var(--sky);}
 
 /* ---------- LIVE SERVICE PREVIEWS (Our Work page) ---------- */
 .preview-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:8px;}
