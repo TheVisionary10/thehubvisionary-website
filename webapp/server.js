@@ -907,6 +907,12 @@ const server = http.createServer(async (req, res) => {
 
     // ---------- everything else: static frontend (with SPA fallback) ----------
     if (req.method === "GET") {
+      // serveStatic serves any file under public/ with no auth check of its
+      // own — admin.html must never be reachable that way (it would skip
+      // the login prompt entirely), so gate it here too, not just at /admin.
+      if (pathname === "/admin.html") {
+        if (!requireAuth(req, res, ip)) return;
+      }
       return serveStatic(req, res, pathname);
     }
 

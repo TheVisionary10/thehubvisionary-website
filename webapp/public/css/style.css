@@ -150,11 +150,18 @@ nav .wrap{display:flex; align-items:center; justify-content:space-between; heigh
 .svc-card{
   background:var(--paper-2); border:1px solid var(--line-light); border-radius:10px;
   padding:0; overflow:hidden; transition:border-color 0.15s, transform 0.15s; text-align:left; width:100%;
+  /* Buttons default to vertically-centering their content, so once CSS
+     Grid stretches a shorter card to match a taller row-mate, the extra
+     height shows up as blank space above the image instead of being
+     absorbed by the body text below it. Flex-column + a fixed-height,
+     non-shrinking media block keeps the image pinned to the top and
+     lets the body (whose text length varies) absorb the extra space. */
+  display:flex; flex-direction:column; align-items:stretch;
 }
 .svc-card:hover{border-color:var(--sky); transform:translateY(-2px);}
 .svc-card-media{
   background:var(--navy); padding:14px; display:flex; align-items:center; justify-content:center;
-  min-height:96px; position:relative;
+  min-height:96px; position:relative; flex-shrink:0;
 }
 .svc-card-num{
   position:absolute; top:10px; left:10px; font-family:var(--mono); font-size:10.5px; color:#DCE9FA;
