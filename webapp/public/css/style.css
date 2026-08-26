@@ -215,7 +215,15 @@ nav .wrap{display:flex; align-items:center; justify-content:space-between; heigh
    card into a narrow viewport — standard, much more readable mobile
    pattern for a detail view like this. */
 @media(max-width:600px){
-  .modal-backdrop{padding:0; align-items:stretch;}
+  /* display:block (not flex) here deliberately — a flex "stretch" item
+     whose content overflows its stretched cross-size gets shifted/clamped
+     by some mobile browsers instead of just growing downward, leaving a
+     gap at the bottom of the screen where the dimmed page behind it (and
+     the floating WhatsApp button) shows through. A plain block box with
+     min-height:100% always starts flush at the top and grows with its
+     content, so there's no gap to leak through regardless of content
+     height. */
+  .modal-backdrop{padding:0; display:block; overflow-y:auto;}
   .modal{
     max-width:none; width:100%; min-height:100%; margin-top:0;
     border-radius:0; padding:24px 16px 32px;

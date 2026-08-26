@@ -62,6 +62,33 @@
   }
 
   /**
+   * Body scroll lock for modals. Just toggling overflow:hidden is enough
+   * on desktop, but on mobile — when the page was already scrolled down
+   * before the modal opened — some browsers keep treating body as if it
+   * were still scrolled to that position while "frozen", which can throw
+   * off fixed-position layout underneath. Pinning body in place with
+   * position:fixed and a negative top offset, then restoring the real
+   * scroll position on close, avoids that whole class of glitch.
+   */
+  let lockedScrollY = 0;
+  function lockBodyScroll() {
+    lockedScrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
+  }
+  function unlockBodyScroll() {
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.overflow = "";
+    window.scrollTo(0, lockedScrollY);
+  }
+
+  /**
    * Generic "fade + rise" reveal for every top-level section on the
    * current page — applied automatically after each route render, no
    * per-page markup needed. The first section (the hero) shows instantly;
@@ -156,11 +183,11 @@
       </div>
     `;
     document.body.appendChild(backdrop);
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
 
     function close() {
       backdrop.remove();
-      document.body.style.overflow = "";
+      unlockBodyScroll();
     }
     backdrop.querySelector(".modal-close").addEventListener("click", close);
     backdrop.addEventListener("click", (e) => {
@@ -714,11 +741,11 @@
       </div>
     `;
     document.body.appendChild(backdrop);
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
 
     function close() {
       backdrop.remove();
-      document.body.style.overflow = "";
+      unlockBodyScroll();
     }
     backdrop.querySelector(".modal-close").addEventListener("click", close);
     backdrop.addEventListener("click", (e) => {
