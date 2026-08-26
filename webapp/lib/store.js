@@ -100,6 +100,31 @@ function cleanText(str, maxLen) {
   return String(str == null ? "" : str).trim().slice(0, maxLen || 5000);
 }
 
+/** Rejects (returns "") a URL-shaped value whose scheme isn't in the
+ * allowlist. cleanText() only trims/truncates, so without this a stored
+ * social link or partner URL could be a `javascript:` URI that runs when
+ * a visitor clicks the link it's rendered into. */
+function sanitizeUrl(str, maxLen) {
+  const val = cleanText(str, maxLen);
+  if (!val) return val;
+  return /^(https?:|mailto:)/i.test(val) ? val : "";
+}
+
+/** For the rendering surfaces referenced above that build HTML directly
+ * (currently: the admin notification emails in server.js) — escapes the
+ * five HTML-significant characters so user-submitted text (a booking
+ * name/message, a quote line item) can't inject markup or links into an
+ * email the site owner opens in their mail client. */
+function escapeHtml(str) {
+  return String(str == null ? "" : str).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c]));
+}
+
 function toCSV(rows, columns) {
   const escapeCell = (v) => {
     const s = v == null ? "" : String(v);
@@ -125,5 +150,7 @@ module.exports = {
   writeJSON,
   genId,
   cleanText,
+  sanitizeUrl,
+  escapeHtml,
   toCSV,
 };

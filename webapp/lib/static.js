@@ -47,8 +47,11 @@ function serveStatic(req, res, urlPath) {
   const base = PERSISTED_PREFIXES.some((p) => rel.startsWith(p)) ? PERSIST_DIR : PUBLIC_DIR;
   const filePath = path.normalize(path.join(base, rel));
 
-  // prevent path traversal outside the intended base directory
-  if (!filePath.startsWith(base)) {
+  // Prevent path traversal outside the intended base directory. A plain
+  // startsWith(base) would also match a sibling directory whose name
+  // merely starts with base's (e.g. "public-secret" next to "public") —
+  // require the match to land exactly on a directory boundary.
+  if (filePath !== base && !filePath.startsWith(base + path.sep)) {
     res.writeHead(403);
     return res.end("Forbidden");
   }

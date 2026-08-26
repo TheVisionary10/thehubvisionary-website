@@ -12,7 +12,7 @@ const http = require("http");
 const path = require("path");
 const { URL } = require("url");
 
-const { readJSON, writeJSON, cleanText, toCSV, genId, FILES, initStorage, PERSIST_DIR } = require("./lib/store");
+const { readJSON, writeJSON, cleanText, sanitizeUrl, escapeHtml, toCSV, genId, FILES, initStorage, PERSIST_DIR } = require("./lib/store");
 initStorage(); // creates data/generated dirs, seeds a fresh STORAGE_DIR with default content on first boot
 const {
   sendJSON,
@@ -91,7 +91,14 @@ const server = http.createServer(async (req, res) => {
 
   const parsed = new URL(req.url, `http://${req.headers.host}`);
   const pathname = parsed.pathname;
-  const ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").split(",")[0].trim();
+  // Render's edge proxy is the only hop between the internet and this
+  // process, and it APPENDS the real connecting IP to whatever
+  // X-Forwarded-For value (if any) the client sent — so the trustworthy
+  // entry is the LAST one, not the first. Trusting the first entry lets a
+  // client set its own X-Forwarded-For to a fake, ever-changing address
+  // and defeat rate limiting / the admin login lockout entirely.
+  const xff = req.headers["x-forwarded-for"];
+  const ip = xff ? xff.split(",").pop().trim() : req.socket.remoteAddress || "unknown";
 
   try {
     // =========================================================
@@ -172,14 +179,14 @@ const server = http.createServer(async (req, res) => {
         emailHtml: `
           <h2 style="font-family:sans-serif;">New callout booking</h2>
           <table style="font-family:sans-serif; font-size:14px; border-collapse:collapse;">
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Name</td><td><b>${record.name}</b></td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Phone</td><td>${record.phone}</td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Service</td><td>${record.service}</td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">County</td><td>${record.county}</td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Address</td><td>${record.address || "—"}</td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Preferred date</td><td>${record.preferredDate || "—"}</td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Estimated callout fee</td><td>${record.calloutFee || "—"}${record.accommodationLikely ? " (accommodation may apply)" : ""}</td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666; vertical-align:top;">Message</td><td>${record.message || "—"}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Name</td><td><b>${escapeHtml(record.name)}</b></td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Phone</td><td>${escapeHtml(record.phone)}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Service</td><td>${escapeHtml(record.service)}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">County</td><td>${escapeHtml(record.county)}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Address</td><td>${escapeHtml(record.address) || "—"}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Preferred date</td><td>${escapeHtml(record.preferredDate) || "—"}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Estimated callout fee</td><td>${escapeHtml(record.calloutFee) || "—"}${record.accommodationLikely ? " (accommodation may apply)" : ""}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666; vertical-align:top;">Message</td><td>${escapeHtml(record.message) || "—"}</td></tr>
           </table>
           <p style="font-family:sans-serif; font-size:13px; margin-top:16px;">Log into <a href="https://thehubvisionary.com/admin">the admin panel</a> for the full booking list and to update its status.</p>
         `,
@@ -282,7 +289,7 @@ const server = http.createServer(async (req, res) => {
         `📄 New quote generated: ${record.number} for ${client.name} (${client.phone}) — est. ${record.totalLow.toLocaleString()}–${record.totalHigh.toLocaleString()}.`
       );
 
-      const itemsListHtml = items.map((it) => `<li>${it.description}${it.detail ? " — " + it.detail : ""}</li>`).join("");
+      const itemsListHtml = items.map((it) => `<li>${escapeHtml(it.description)}${it.detail ? " — " + escapeHtml(it.detail) : ""}</li>`).join("");
       const quoteEstText =
         record.totalLow === record.totalHigh
           ? `KSh ${record.totalHigh.toLocaleString()}`
@@ -292,11 +299,11 @@ const server = http.createServer(async (req, res) => {
         emailHtml: `
           <h2 style="font-family:sans-serif;">New quote requested</h2>
           <table style="font-family:sans-serif; font-size:14px; border-collapse:collapse;">
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Quote number</td><td><b>${record.number}</b></td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Name</td><td>${client.name}</td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Phone</td><td>${client.phone}</td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">Email</td><td>${client.email || "—"}</td></tr>
-            <tr><td style="padding:4px 12px 4px 0; color:#666;">County</td><td>${client.county || "—"}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Quote number</td><td><b>${escapeHtml(record.number)}</b></td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Name</td><td>${escapeHtml(client.name)}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Phone</td><td>${escapeHtml(client.phone)}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">Email</td><td>${escapeHtml(client.email) || "—"}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#666;">County</td><td>${escapeHtml(client.county) || "—"}</td></tr>
             <tr><td style="padding:4px 12px 4px 0; color:#666; vertical-align:top;">Services</td><td><ul style="margin:0; padding-left:16px;">${itemsListHtml}</ul></td></tr>
             <tr><td style="padding:4px 12px 4px 0; color:#666;">Estimated total</td><td><b>${quoteEstText}</b></td></tr>
           </table>
@@ -806,7 +813,7 @@ const server = http.createServer(async (req, res) => {
         category: cleanText(body.category, 100) || "Partner",
         description: cleanText(body.description, 500),
         logoUrl,
-        url: cleanText(body.url, 300),
+        url: sanitizeUrl(body.url, 300),
       };
       partners.push(record);
       writeJSON(FILES.partners, partners);
@@ -834,7 +841,7 @@ const server = http.createServer(async (req, res) => {
         name: cleanText(body.name, 150) || partners[idx].name,
         category: cleanText(body.category, 100) || partners[idx].category,
         description: cleanText(body.description, 500),
-        url: cleanText(body.url, 300),
+        url: sanitizeUrl(body.url, 300),
         logoUrl,
       };
       writeJSON(FILES.partners, partners);
@@ -878,6 +885,11 @@ const server = http.createServer(async (req, res) => {
         const n = Number(val);
         return Number.isFinite(n) ? n : fallback;
       };
+      // Same "was it sent" distinction as field(), but rejects a
+      // javascript: (or other non-http/mailto) scheme instead of just
+      // trimming — these get rendered straight into an <a href> on the
+      // public site.
+      const urlField = (val, fallback, maxLen) => (val !== undefined ? sanitizeUrl(val, maxLen) : fallback);
 
       const bodySocials = body.socials || {};
       const bodyPayment = body.payment || {};
@@ -892,12 +904,12 @@ const server = http.createServer(async (req, res) => {
         whatsappNumber: field(body.whatsappNumber, current.whatsappNumber, 20),
         whatsappNumber2: field(body.whatsappNumber2, current.whatsappNumber2, 20),
         socials: {
-          facebook: field(bodySocials.facebook, currentSocials.facebook, 300),
-          instagram: field(bodySocials.instagram, currentSocials.instagram, 300),
-          twitter: field(bodySocials.twitter, currentSocials.twitter, 300),
-          linkedin: field(bodySocials.linkedin, currentSocials.linkedin, 300),
-          tiktok: field(bodySocials.tiktok, currentSocials.tiktok, 300),
-          youtube: field(bodySocials.youtube, currentSocials.youtube, 300),
+          facebook: urlField(bodySocials.facebook, currentSocials.facebook, 300),
+          instagram: urlField(bodySocials.instagram, currentSocials.instagram, 300),
+          twitter: urlField(bodySocials.twitter, currentSocials.twitter, 300),
+          linkedin: urlField(bodySocials.linkedin, currentSocials.linkedin, 300),
+          tiktok: urlField(bodySocials.tiktok, currentSocials.tiktok, 300),
+          youtube: urlField(bodySocials.youtube, currentSocials.youtube, 300),
         },
         payment: {
           mpesaTill: field(bodyPayment.mpesaTill, currentPayment.mpesaTill, 30),

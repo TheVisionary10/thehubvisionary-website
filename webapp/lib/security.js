@@ -220,16 +220,24 @@ function validateContact(body) {
   return errors;
 }
 
+// Matches the .slice(0, 20) applied to accepted quotes downstream — capping
+// here too means a request with a huge items array (still possible within
+// the request body's overall byte cap, e.g. thousands of tiny objects) only
+// costs a slice, not a full validation pass over every element.
+const MAX_QUOTE_ITEMS = 20;
+
 function validateQuoteRequest(body) {
   const errors = [];
   const name = (body.name || "").toString().trim();
   const phone = (body.phone || "").toString().trim();
-  const items = Array.isArray(body.items) ? body.items : [];
+  const rawItems = Array.isArray(body.items) ? body.items : [];
+  const items = rawItems.slice(0, MAX_QUOTE_ITEMS);
 
   if (!name || name.length < 2) errors.push("Please add your name.");
   if (!isValidPhone(phone)) errors.push("Please add a valid phone number.");
   if (body.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) errors.push("Please add a valid email or leave it blank.");
   if (!items.length) errors.push("Add at least one service to the quote.");
+  if (rawItems.length > MAX_QUOTE_ITEMS) errors.push(`Please limit a single quote to ${MAX_QUOTE_ITEMS} services.`);
   items.forEach((it, i) => {
     if (!it.description) errors.push(`Line item ${i + 1} is missing a description.`);
 
