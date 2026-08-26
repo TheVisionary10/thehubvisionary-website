@@ -10,8 +10,8 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "pdf-lib": "^1.17.1",
-    "nodemailer": "^6.9.14"
+    "nodemailer": "^9.0.5",
+    "pdf-lib": "^1.17.1"
   },
   "license": "UNLICENSED",
   "private": true
