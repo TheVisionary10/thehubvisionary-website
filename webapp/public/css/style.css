@@ -144,9 +144,15 @@ nav .wrap{display:flex; align-items:center; justify-content:space-between; heigh
 }
 .cat-label::after{content:''; flex:1; height:1px; background:var(--line-light);}
 .cat-label:first-of-type{margin-top:0;}
-.svc-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;}
-@media(max-width:860px){ .svc-grid{grid-template-columns:repeat(2, 1fr);} }
-@media(max-width:560px){ .svc-grid{grid-template-columns:1fr;} }
+/* flex, not grid — a grid always left-aligns a category's last row (e.g.
+   4 or 5 services in 3 columns leaves an incomplete row stuck to the
+   left with a dead gap). Flex + justify-content:center centers whatever
+   is left in the last row instead, so every category looks intentional
+   whether its count divides evenly into the column count or not. */
+.svc-grid{display:flex; flex-wrap:wrap; justify-content:center; gap:16px;}
+.svc-grid > .svc-card{flex:0 1 calc((100% - 32px)/3);}
+@media(max-width:860px){ .svc-grid > .svc-card{flex:0 1 calc((100% - 16px)/2);} }
+@media(max-width:560px){ .svc-grid > .svc-card{flex:0 1 100%;} }
 .svc-card{
   background:var(--paper-2); border:1px solid var(--line-light); border-radius:10px;
   padding:0; overflow:hidden; transition:border-color 0.15s, transform 0.15s; text-align:left; width:100%;
