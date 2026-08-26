@@ -80,4 +80,4 @@ function serveStatic(req, res, urlPath) {
   });
 }
 
-module.exports = { serveStatic, MIME };
+module.exports = { serveStatic };

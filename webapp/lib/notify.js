@@ -38,10 +38,6 @@ function smsConfigured() {
   return Boolean(AT_USERNAME && AT_API_KEY);
 }
 
-function isNotifyConfigured() {
-  return isEmailConfigured() || smsConfigured();
-}
-
 /** Best-effort conversion of common Kenyan phone formats to E.164
  * (+254...), which Africa's Talking requires. */
 function normalizeKenyanPhone(phone) {
@@ -125,22 +121,17 @@ async function notifyAdmin({ subject, emailHtml, smsText, settings }) {
     // never let a notification failure affect the booking/quote itself
   }
 
-    try {
+  try {
     const toPhone = ADMIN_NOTIFY_PHONE || (settings && settings.phone1) || "";
-    console.log("Attempting SMS to:", toPhone); // ADD THIS LINE
     if (toPhone && smsConfigured()) {
       const r = await sendSMS(toPhone, smsText);
-      console.log("SMS Result:", r); // ADD THIS LINE
       results.smsSent = r.ok;
-    } else {
-      console.log("SMS skipped: phone number or config missing."); // ADD THIS LINE
     }
   } catch (e) {
-    console.error("Hidden SMS Error:", e); // ADD THIS LINE
+    // never let a notification failure affect the booking/quote itself
   }
-
 
   return results;
 }
 
-module.exports = { notifyAdmin, sendSMS, smsConfigured, isNotifyConfigured, normalizeKenyanPhone };
+module.exports = { notifyAdmin };

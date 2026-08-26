@@ -255,16 +255,12 @@ function validateQuoteRequest(body) {
 }
 
 module.exports = {
-  ADMIN_USER,
-  ADMIN_PASS,
   sendJSON,
   applySecurityHeaders,
   readBody,
   rateLimited,
-  checkBasicAuth,
   requireAuth,
   validateStatus,
-  isValidPhone,
   validateBooking,
   validateContact,
   validateQuoteRequest,

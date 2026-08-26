@@ -67,4 +67,4 @@ function deleteUploadedImage(relativePath) {
   }
 }
 
-module.exports = { saveUploadedImage, deleteUploadedImage, MAX_BYTES };
+module.exports = { saveUploadedImage, deleteUploadedImage };

@@ -418,4 +418,4 @@ async function generateDocumentPDF(opts) {
   return { buffer: Buffer.from(bytes), totalLow, totalHigh, isEstimate: anyRange };
 }
 
-module.exports = { generateDocumentPDF, fmtMoney, fmtAmount, fmtDate, fmtDateTime };
+module.exports = { generateDocumentPDF };

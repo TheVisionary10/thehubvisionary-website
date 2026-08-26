@@ -21,7 +21,6 @@ const {
   rateLimited,
   requireAuth,
   validateStatus,
-  isValidPhone,
   validateBooking,
   validateContact,
   validateQuoteRequest,
@@ -871,6 +870,14 @@ const server = http.createServer(async (req, res) => {
       // this backwards for some fields and right for others — this is
       // the one correct rule, applied uniformly everywhere below.
       const field = (val, fallback, maxLen) => (val !== undefined ? cleanText(val, maxLen) : fallback);
+      // Same "was it sent at all" distinction as field(), but for numbers —
+      // Number(0) is falsy, so `body.x || fallback` would silently refuse
+      // to ever save an explicit 0 for these.
+      const numField = (val, fallback) => {
+        if (val === undefined) return fallback;
+        const n = Number(val);
+        return Number.isFinite(n) ? n : fallback;
+      };
 
       const bodySocials = body.socials || {};
       const bodyPayment = body.payment || {};
@@ -898,8 +905,8 @@ const server = http.createServer(async (req, res) => {
           mpesaAccount: field(bodyPayment.mpesaAccount, currentPayment.mpesaAccount, 30),
           chequePayable: field(bodyPayment.chequePayable, currentPayment.chequePayable || "The Hub Visionary", 100),
         },
-        quoteValidityDays: body.quoteValidityDays !== undefined ? Number(body.quoteValidityDays) || current.quoteValidityDays || 14 : current.quoteValidityDays || 14,
-        invoiceDueDays: body.invoiceDueDays !== undefined ? Number(body.invoiceDueDays) || current.invoiceDueDays || 7 : current.invoiceDueDays || 7,
+        quoteValidityDays: numField(body.quoteValidityDays, current.quoteValidityDays || 14),
+        invoiceDueDays: numField(body.invoiceDueDays, current.invoiceDueDays || 7),
       };
       writeJSON(FILES.settings, next);
       return sendJSON(res, 200, { ok: true, settings: next });
